@@ -1,5 +1,6 @@
 import { Heart, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
@@ -17,8 +18,9 @@ interface AvatarCardProps {
 
 const AvatarCard = ({ image, name, creator, price, likes, views, index }: AvatarCardProps) => {
   return (
-    <div 
-      className="group relative rounded-2xl overflow-hidden glass hover:scale-105 transition-all duration-500 animate-fade-in"
+    <Link 
+      to={`/avatar/${index + 1}`}
+      className="group relative rounded-2xl overflow-hidden glass hover:scale-105 transition-all duration-500 animate-fade-in block"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       {/* Image */}
@@ -58,7 +60,7 @@ const AvatarCard = ({ image, name, creator, price, likes, views, index }: Avatar
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
