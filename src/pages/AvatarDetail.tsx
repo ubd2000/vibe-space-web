@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
-import { 
-  Heart, 
-  Share2, 
-  ShoppingCart, 
-  Star, 
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useCart } from "@/hooks/useCart";
+import { toast } from "sonner";
+import {
+  Heart,
+  Share2,
+  ShoppingCart,
+  Star,
   ChevronLeft,
   ChevronRight,
   Award,
@@ -14,8 +16,11 @@ import {
   Shield,
   Check,
   User,
-  ThumbsUp
+  ThumbsUp,
+  Box,
+  Image as ImageIcon
 } from "lucide-react";
+import "@google/model-viewer";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -27,8 +32,11 @@ import avatar1 from "@/assets/avatar-1.png";
 
 const AvatarDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { add } = useCart();
   const [selectedImage, setSelectedImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [show3D, setShow3D] = useState(false);
 
   // Mock data - in real app this would come from API
   const avatar = {
@@ -62,7 +70,33 @@ const AvatarDetail = () => {
       rating: 4.9,
       verified: true,
       description: "5년차 버츄얼 아바타 전문 크리에이터입니다. 사이버펑크와 판타지 스타일을 주로 작업합니다."
-    }
+    },
+    detailedDescription: `
+      <h2>✨ 네온 드리머 상세 소개</h2>
+      <p>안녕하세요! 사이버펑크 세계관을 기반으로 제작된 오리지널 아바타 '네온 드리머'입니다.</p>
+      <p>이 아바타는 VTube Studio와 호환되며, 방송용으로 즉시 사용 가능하도록 세팅되어 있습니다.</p>
+      
+      <h3>🎥 모션 프리뷰</h3>
+      <p>다양한 표정과 자연스러운 움직임을 확인해보세요.</p>
+      <div class="grid grid-cols-2 gap-4 my-4">
+        <img src="${avatarDetail1}" class="rounded-lg shadow-md" alt="Motion 1" />
+        <img src="${avatarDetail2}" class="rounded-lg shadow-md" alt="Motion 2" />
+      </div>
+
+      <h3>🎨 색상 팔레트</h3>
+      <p>주요 컬러는 시안(#00FFFF)과 마젠타(#FF00FF)를 사용하여 네온 사인의 화려함을 표현했습니다.</p>
+      
+      <h3>📦 파일 구성</h3>
+      <ul>
+        <li>Live2D 모델 파일 (.moc3)</li>
+        <li>텍스처 아틀라스</li>
+        <li>물리 연산 설정 파일 (.json)</li>
+        <li>표정 설정 파일 (.exp3.json)</li>
+        <li>PSD 원본 (레이어 분리됨)</li>
+      </ul>
+
+      <p class="text-xs text-muted-foreground mt-8">* 무단 재배포 및 수정을 금지합니다. 상업적 이용 시 라이센스 범위를 확인해주세요.</p>
+    `
   };
 
   const reviews = [
@@ -86,10 +120,46 @@ const AvatarDetail = () => {
     setSelectedImage((prev) => (prev - 1 + avatar.images.length) % avatar.images.length);
   };
 
+  // Helper function to parse price string
+  const parsePrice = (priceString: string): number => {
+    return parseInt(priceString.replace(/[₩,]/g, ''));
+  };
+
+  // Handle add to cart
+  const handleAddToCart = () => {
+    const success = add({
+      id: avatar.id,
+      name: avatar.name,
+      image: avatar.images[0],
+      price: parsePrice(avatar.price),
+      originalPrice: avatar.originalPrice ? parsePrice(avatar.originalPrice) : undefined,
+      creator: avatar.creator.name,
+      category: avatar.category,
+    });
+
+    if (success) {
+      toast.success("장바구니에 추가되었습니다", {
+        description: `${avatar.name}이(가) 장바구니에 추가되었습니다`,
+        action: {
+          label: "장바구니 보기",
+          onClick: () => navigate("/cart"),
+        },
+      });
+    } else {
+      toast.info("이미 장바구니에 있습니다", {
+        description: "장바구니에서 확인해주세요",
+        action: {
+          label: "장바구니 보기",
+          onClick: () => navigate("/cart"),
+        },
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      
+
       <main className="pt-20 pb-16">
         <div className="container mx-auto px-4">
           {/* Breadcrumb */}
@@ -106,28 +176,62 @@ const AvatarDetail = () => {
             <div className="space-y-4 animate-fade-in">
               {/* Main Image */}
               <div className="relative aspect-square rounded-2xl overflow-hidden glass group">
-                <img 
-                  src={avatar.images[selectedImage]} 
-                  alt={avatar.name}
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Navigation Arrows */}
-                <button 
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
+                {/* 3D Model Viewer or Image */}
+                {show3D ? (
+                  <model-viewer
+                    src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+                    poster={avatar.images[0]}
+                    alt={`3D model of ${avatar.name}`}
+                    camera-controls
+                    auto-rotate
+                    style={{ width: "100%", height: "100%", backgroundColor: "var(--background)" }}
+                  />
+                ) : (
+                  <img
+                    src={avatar.images[selectedImage]}
+                    alt={avatar.name}
+                    className="w-full h-full object-cover"
+                  />
+                )}
+
+                {/* View Toggle Button - Top Right */}
+                <button
+                  onClick={() => setShow3D(!show3D)}
+                  className="absolute top-4 right-4 z-10 px-4 py-2 rounded-full glass hover:bg-primary/20 transition-colors flex items-center gap-2 font-medium text-sm"
                 >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
-                >
-                  <ChevronRight className="w-5 h-5" />
+                  {show3D ? (
+                    <>
+                      <ImageIcon className="w-4 h-4" />
+                      2D 보기
+                    </>
+                  ) : (
+                    <>
+                      <Box className="w-4 h-4" />
+                      3D 보기
+                    </>
+                  )}
                 </button>
 
+                {/* Navigation Arrows (Only show in 2D mode) */}
+                {!show3D && (
+                  <>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full glass flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-muted/50"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+                  </>
+                )}
+
                 {/* Discount Badge */}
-                {avatar.discount && (
+                {avatar.discount && !show3D && (
                   <div className="absolute top-4 left-4 px-3 py-1 rounded-full bg-accent text-accent-foreground text-sm font-semibold">
                     -{avatar.discount}%
                   </div>
@@ -140,11 +244,10 @@ const AvatarDetail = () => {
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative w-20 h-20 rounded-lg overflow-hidden transition-all duration-300 ${
-                      selectedImage === index 
-                        ? "ring-2 ring-primary shadow-[0_0_15px_hsl(180_100%_50%/0.4)]" 
-                        : "opacity-60 hover:opacity-100"
-                    }`}
+                    className={`relative w-20 h-20 rounded-lg overflow-hidden transition-all duration-300 ${selectedImage === index
+                      ? "ring-2 ring-primary shadow-[0_0_15px_hsl(180_100%_50%/0.4)]"
+                      : "opacity-60 hover:opacity-100"
+                      }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
@@ -233,12 +336,12 @@ const AvatarDetail = () => {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4">
-                <Button variant="hero" size="xl" className="flex-1">
+                <Button variant="hero" size="xl" className="flex-1" onClick={handleAddToCart}>
                   <ShoppingCart className="w-5 h-5" />
-                  구매하기
+                  장바구니에 추가
                 </Button>
-                <Button 
-                  variant="glass" 
+                <Button
+                  variant="glass"
                   size="xl"
                   onClick={() => setIsLiked(!isLiked)}
                   className={isLiked ? "text-accent" : ""}
@@ -254,8 +357,8 @@ const AvatarDetail = () => {
               <div className="p-5 rounded-xl glass">
                 <div className="flex items-center gap-4">
                   <div className="relative">
-                    <img 
-                      src={avatar.creator.avatar} 
+                    <img
+                      src={avatar.creator.avatar}
                       alt={avatar.creator.name}
                       className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/50"
                     />
@@ -282,6 +385,17 @@ const AvatarDetail = () => {
             </div>
           </div>
 
+          {/* Detailed Description Section (User Editor Content) */}
+          <section className="mt-16 animate-fade-in space-y-6">
+            <h2 className="font-display text-2xl font-bold text-foreground border-b border-border pb-4">
+              상품 정보
+            </h2>
+            <div
+              className="prose prose-invert max-w-none glass p-8 rounded-2xl"
+              dangerouslySetInnerHTML={{ __html: avatar.detailedDescription }}
+            />
+          </section>
+
           {/* Reviews Section */}
           <section className="mt-16 animate-fade-in" style={{ animationDelay: "0.2s" }}>
             <div className="flex items-center justify-between mb-6">
@@ -296,25 +410,25 @@ const AvatarDetail = () => {
               <div className="p-6 rounded-xl glass text-center">
                 <div className="font-display text-5xl font-bold text-primary mb-2">{avatar.rating}</div>
                 <div className="flex justify-center gap-1 mb-2">
-                  {[1,2,3,4,5].map((star) => (
-                    <Star 
-                      key={star} 
-                      className={`w-5 h-5 ${star <= Math.round(avatar.rating) ? "text-yellow-500 fill-yellow-500" : "text-muted"}`} 
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-5 h-5 ${star <= Math.round(avatar.rating) ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
                     />
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground">{avatar.reviewCount}개의 리뷰</p>
               </div>
-              
+
               <div className="md:col-span-3 p-6 rounded-xl glass">
-                {[5,4,3,2,1].map((rating) => {
+                {[5, 4, 3, 2, 1].map((rating) => {
                   const count = reviews.filter(r => r.rating === rating).length;
                   const percentage = (count / reviews.length) * 100;
                   return (
                     <div key={rating} className="flex items-center gap-3 mb-2">
                       <span className="text-sm text-muted-foreground w-8">{rating}점</span>
                       <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
-                        <div 
+                        <div
                           className="h-full bg-gradient-to-r from-primary to-secondary rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         />
@@ -329,8 +443,8 @@ const AvatarDetail = () => {
             {/* Review List */}
             <div className="space-y-4">
               {reviews.map((review, index) => (
-                <div 
-                  key={review.id} 
+                <div
+                  key={review.id}
                   className="p-5 rounded-xl glass animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
@@ -345,10 +459,10 @@ const AvatarDetail = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      {[1,2,3,4,5].map((star) => (
-                        <Star 
-                          key={star} 
-                          className={`w-4 h-4 ${star <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-muted"}`} 
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          className={`w-4 h-4 ${star <= review.rating ? "text-yellow-500 fill-yellow-500" : "text-muted"}`}
                         />
                       ))}
                     </div>
@@ -374,14 +488,14 @@ const AvatarDetail = () => {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
               {relatedAvatars.map((item, index) => (
-                <Link 
-                  key={item.id} 
+                <Link
+                  key={item.id}
                   to={`/avatar/${item.id}`}
                   className="group rounded-2xl overflow-hidden glass hover:scale-105 transition-all duration-500"
                 >
                   <div className="aspect-square overflow-hidden">
-                    <img 
-                      src={item.image} 
+                    <img
+                      src={item.image}
                       alt={item.name}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />

@@ -1,5 +1,6 @@
 import { Star, Award, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
@@ -8,7 +9,7 @@ import avatar4 from "@/assets/avatar-4.png";
 interface CreatorCardProps {
   avatar: string;
   name: string;
-  specialty: string;
+  tags: string[];
   followers: number;
   sales: number;
   rating: number;
@@ -16,16 +17,16 @@ interface CreatorCardProps {
   index: number;
 }
 
-const CreatorCard = ({ avatar, name, specialty, followers, sales, rating, verified, index }: CreatorCardProps) => {
+const CreatorCard = ({ avatar, name, tags, followers, sales, rating, verified, index }: CreatorCardProps) => {
   return (
-    <div 
+    <div
       className="group p-6 rounded-2xl glass hover:shadow-[0_0_40px_hsl(180_100%_50%/0.2)] transition-all duration-500 animate-fade-in"
       style={{ animationDelay: `${index * 0.15}s` }}
     >
       <div className="flex items-center gap-4 mb-4">
         <div className="relative">
-          <img 
-            src={avatar} 
+          <img
+            src={avatar}
             alt={name}
             className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/50"
           />
@@ -37,7 +38,13 @@ const CreatorCard = ({ avatar, name, specialty, followers, sales, rating, verifi
         </div>
         <div>
           <h3 className="font-display font-semibold text-lg text-foreground">{name}</h3>
-          <p className="text-sm text-muted-foreground">{specialty}</p>
+          <div className="flex flex-wrap gap-1 mt-1">
+            {tags.slice(0, 3).map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[10px] font-medium">
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -59,19 +66,21 @@ const CreatorCard = ({ avatar, name, specialty, followers, sales, rating, verifi
         </div>
       </div>
 
-      <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-        프로필 보기
-      </Button>
+      <Link to={`/creator/${name}`}>
+        <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+          프로필 보기
+        </Button>
+      </Link>
     </div>
   );
 };
 
 const CreatorsSection = () => {
   const creators = [
-    { avatar: avatar1, name: "PixelMaster", specialty: "VTuber 아바타", followers: 12500, sales: 234, rating: 4.9, verified: true },
-    { avatar: avatar2, name: "MoonArtist", specialty: "판타지 캐릭터", followers: 8900, sales: 156, rating: 4.8, verified: true },
-    { avatar: avatar3, name: "TechCreator", specialty: "사이버펑크", followers: 15600, sales: 312, rating: 4.9, verified: true },
-    { avatar: avatar4, name: "KawaiiDev", specialty: "귀여운 캐릭터", followers: 21000, sales: 489, rating: 5.0, verified: true },
+    { avatar: avatar1, name: "PixelMaster", tags: ["VTuber", "Live2D", "Illustration"], followers: 12500, sales: 234, rating: 4.9, verified: true },
+    { avatar: avatar2, name: "MoonArtist", tags: ["Fantasy", "3D Model", "Texture"], followers: 8900, sales: 156, rating: 4.8, verified: true },
+    { avatar: avatar3, name: "TechCreator", tags: ["Cyberpunk", "Mecha", "VRChat"], followers: 15600, sales: 312, rating: 4.9, verified: true },
+    { avatar: avatar4, name: "KawaiiDev", tags: ["Cute", "Anime", "Accessories"], followers: 21000, sales: 489, rating: 5.0, verified: true },
   ];
 
   return (

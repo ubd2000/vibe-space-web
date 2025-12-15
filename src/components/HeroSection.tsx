@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { ArrowRight, Sparkles } from "lucide-react";
 import heroAvatar from "@/assets/hero-avatar.png";
 
@@ -19,7 +20,7 @@ const HeroSection = () => {
               <Sparkles className="w-4 h-4 text-primary" />
               <span className="text-muted-foreground">버츄얼 아바타의 새로운 세계</span>
             </div>
-            
+
             <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
               <span className="text-foreground">당신만의</span>
               <br />
@@ -27,22 +28,26 @@ const HeroSection = () => {
               <br />
               <span className="text-foreground">를 만나보세요</span>
             </h1>
-            
+
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              전 세계 크리에이터들의 독창적인 아바타를 발견하고, 
-              나만의 아바타를 제작하여 판매하세요. 
+              전 세계 크리에이터들의 독창적인 아바타를 발견하고,
+              나만의 아바타를 제작하여 판매하세요.
               버츄얼 커뮤니티와 함께 성장하세요.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button variant="hero" size="xl">
-                <Sparkles className="w-5 h-5" />
-                마켓 둘러보기
-              </Button>
-              <Button variant="glass" size="xl">
-                크리에이터 되기
-                <ArrowRight className="w-5 h-5" />
-              </Button>
+              <Link to="/marketplace">
+                <Button variant="hero" size="xl">
+                  <Sparkles className="w-5 h-5" />
+                  마켓 둘러보기
+                </Button>
+              </Link>
+              <Link to="/become-creator">
+                <Button variant="glass" size="xl">
+                  크리에이터 되기
+                  <ArrowRight className="w-5 h-5" />
+                </Button>
+              </Link>
             </div>
 
             <div className="flex items-center gap-8 justify-center lg:justify-start pt-6">
@@ -67,9 +72,9 @@ const HeroSection = () => {
           <div className="relative flex justify-center lg:justify-end animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/30 to-accent/30 rounded-3xl blur-3xl" />
-              <img 
-                src={heroAvatar} 
-                alt="Virtual Avatar" 
+              <img
+                src={heroAvatar}
+                alt="Virtual Avatar"
                 className="relative w-full max-w-lg animate-float drop-shadow-2xl"
               />
             </div>
