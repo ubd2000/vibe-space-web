@@ -1,13 +1,14 @@
 import { Heart, Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import Image, { StaticImageData } from "next/image";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
 import avatar4 from "@/assets/avatar-4.png";
 
 interface AvatarCardProps {
-  image: string;
+  image: string | StaticImageData;
   name: string;
   creator: string;
   price: string;
@@ -18,17 +19,18 @@ interface AvatarCardProps {
 
 const AvatarCard = ({ image, name, creator, price, likes, views, index }: AvatarCardProps) => {
   return (
-    <Link 
-      to={`/avatar/${index + 1}`}
+    <Link
+      href={`/avatar/${index + 1}`}
       className="group relative rounded-2xl overflow-hidden glass hover:scale-105 transition-all duration-500 animate-fade-in block"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       {/* Image */}
       <div className="aspect-square overflow-hidden">
-        <img 
-          src={image} 
+        <Image
+          src={image}
           alt={name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          fill
+          className="object-cover group-hover:scale-110 transition-transform duration-500"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
       </div>
@@ -47,7 +49,7 @@ const AvatarCard = ({ image, name, creator, price, likes, views, index }: Avatar
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <h3 className="font-display font-semibold text-lg text-foreground mb-1 truncate">{name}</h3>
         <p className="text-sm text-muted-foreground mb-3">by {creator}</p>
-        
+
         <div className="flex items-center justify-between">
           <span className="font-display font-bold text-primary text-lg">{price}</span>
           <div className="flex items-center gap-3 text-xs text-muted-foreground">

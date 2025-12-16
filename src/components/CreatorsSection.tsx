@@ -1,13 +1,14 @@
 import { Star, Award, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import Image, { StaticImageData } from "next/image";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
 import avatar4 from "@/assets/avatar-4.png";
 
 interface CreatorCardProps {
-  avatar: string;
+  avatar: string | StaticImageData;
   name: string;
   tags: string[];
   followers: number;
@@ -25,9 +26,11 @@ const CreatorCard = ({ avatar, name, tags, followers, sales, rating, verified, i
     >
       <div className="flex items-center gap-4 mb-4">
         <div className="relative">
-          <img
+          <Image
             src={avatar}
             alt={name}
+            width={64}
+            height={64}
             className="w-16 h-16 rounded-full object-cover ring-2 ring-primary/50"
           />
           {verified && (
@@ -66,7 +69,7 @@ const CreatorCard = ({ avatar, name, tags, followers, sales, rating, verified, i
         </div>
       </div>
 
-      <Link to={`/creator/${name}`}>
+      <Link href={`/creators/${name}`}>
         <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
           프로필 보기
         </Button>

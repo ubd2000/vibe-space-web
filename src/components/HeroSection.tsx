@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Sparkles } from "lucide-react";
 import heroAvatar from "@/assets/hero-avatar.png";
 
@@ -36,13 +37,13 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Link to="/marketplace">
+              <Link href="/marketplace">
                 <Button variant="hero" size="xl">
                   <Sparkles className="w-5 h-5" />
                   마켓 둘러보기
                 </Button>
               </Link>
-              <Link to="/become-creator">
+              <Link href="/become-creator">
                 <Button variant="glass" size="xl">
                   크리에이터 되기
                   <ArrowRight className="w-5 h-5" />
@@ -72,9 +73,12 @@ const HeroSection = () => {
           <div className="relative flex justify-center lg:justify-end animate-fade-in" style={{ animationDelay: "0.3s" }}>
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/30 via-secondary/30 to-accent/30 rounded-3xl blur-3xl" />
-              <img
+              <Image
                 src={heroAvatar}
                 alt="Virtual Avatar"
+                width={600}
+                height={600}
+                priority
                 className="relative w-full max-w-lg animate-float drop-shadow-2xl"
               />
             </div>

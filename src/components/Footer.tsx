@@ -17,7 +17,7 @@ const Footer = () => {
   return (
     <footer className="relative pt-20 pb-8 border-t border-border">
       <div className="absolute inset-0 bg-gradient-to-t from-muted/20 to-transparent" />
-      
+
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           {/* Brand */}
@@ -53,7 +53,7 @@ const Footer = () => {
                 {items.map((item) => (
                   <li key={item}>
                     <a
-                      href="#"
+                      href="/"
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       {item}

@@ -1,10 +1,13 @@
-import { Link, useLocation, Outlet } from "react-router-dom";
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LayoutDashboard, ShoppingBag, Heart, Users, Settings, LogOut } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const BuyerLayout = () => {
-    const location = useLocation();
+const BuyerLayout = ({ children }: { children: React.ReactNode }) => {
+    const pathname = usePathname();
 
     const menuItems = [
         { icon: LayoutDashboard, label: "대시보드", path: "/buyer/dashboard" },
@@ -27,11 +30,11 @@ const BuyerLayout = () => {
                                 </h2>
                                 <nav className="space-y-1">
                                     {menuItems.map((item) => {
-                                        const isActive = location.pathname === item.path;
+                                        const isActive = pathname === item.path;
                                         return (
                                             <Link
                                                 key={item.path}
-                                                to={item.path}
+                                                href={item.path}
                                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
                                                     ? "bg-primary/20 text-primary font-semibold"
                                                     : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
@@ -51,7 +54,7 @@ const BuyerLayout = () => {
                                 </h2>
                                 <nav className="space-y-1">
                                     <Link
-                                        to="/buyer/settings"
+                                        href="/buyer/settings"
                                         className="flex items-center gap-3 px-4 py-3 rounded-xl text-muted-foreground hover:bg-white/5 hover:text-foreground transition-all duration-200"
                                     >
                                         <Settings className="w-5 h-5" />
@@ -68,7 +71,7 @@ const BuyerLayout = () => {
 
                     {/* Main Content Area */}
                     <div className="flex-1 animate-fade-in order-2" style={{ animationDelay: "0.1s" }}>
-                        <Outlet />
+                        {children}
                     </div>
                 </div>
             </main>

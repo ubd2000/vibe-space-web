@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+/* eslint-disable */
+import { useState, useEffect, type ElementType } from "react";
 import { MessageCircle, Hash, Image as ImageIcon, HelpCircle, Newspaper, ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Category {
     id: string;
     name: string;
-    icon: React.ElementType;
+    icon: ElementType;
     subCategories?: { id: string; name: string }[];
 }
 

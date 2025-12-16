@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { MessageCircle, Heart, Eye, MoreHorizontal, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -32,7 +31,7 @@ interface PostListProps {
 }
 
 const PostList = ({ selectedCategory }: PostListProps) => {
-    const navigate = useNavigate();
+    const router = useRouter();
     const filteredPosts = selectedCategory === "all"
         ? allPosts
         : allPosts.filter(post => post.category === selectedCategory);
@@ -45,12 +44,17 @@ const PostList = ({ selectedCategory }: PostListProps) => {
                 {filteredPosts.map((post) => (
                     <div
                         key={post.id}
-                        onClick={() => navigate(`/community/post/${post.id}`)}
+                        onClick={() => router.push(`/community/post/${post.id}`)}
                         className="group rounded-2xl overflow-hidden glass hover:shadow-lg transition-all duration-300 cursor-pointer"
                     >
                         <div className="aspect-square relative overflow-hidden bg-muted">
                             {post.image ? (
-                                <img src={post.image} alt={post.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                <Image
+                                    src={post.image}
+                                    alt={post.title}
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                />
                             ) : (
                                 <div className="flex items-center justify-center h-full text-muted-foreground">
                                     <ImageIcon className="w-10 h-10" />
@@ -77,7 +81,7 @@ const PostList = ({ selectedCategory }: PostListProps) => {
             {filteredPosts.map((post) => (
                 <div
                     key={post.id}
-                    onClick={() => navigate(`/community/post/${post.id}`)}
+                    onClick={() => router.push(`/community/post/${post.id}`)}
                     className="p-4 rounded-xl glass hover:bg-secondary/10 transition-colors flex items-center justify-between group cursor-pointer"
                 >
                     <div className="flex-1 min-w-0 pr-4">

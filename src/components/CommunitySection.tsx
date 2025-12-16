@@ -1,8 +1,9 @@
+"use client";
 
 import { useState } from "react";
 import { MessageCircle, ThumbsUp, Clock, TrendingUp, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 interface PostCardProps {
@@ -18,10 +19,10 @@ interface PostCardProps {
 }
 
 const PostCard = ({ id, title, author, category, likes, comments, time, trending, index }: PostCardProps) => {
-  const navigate = useNavigate();
+  const router = useRouter();
   return (
     <div
-      onClick={() => navigate(`/community/post/${id}`)}
+      onClick={() => router.push(`/community/post/${id}`)}
       className="group p-5 rounded-xl glass hover:bg-muted/30 transition-all duration-300 cursor-pointer animate-fade-in"
       style={{ animationDelay: `${index * 0.05}s` }}
     >
@@ -113,7 +114,7 @@ const categories = [
 ];
 
 const CommunitySection = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState(categories[0].id);
 
   // Filter by category and sort by likes (descending)
@@ -140,7 +141,7 @@ const CommunitySection = () => {
               지금 가장 핫한 이야기를 놓치지 마세요
             </p>
           </div>
-          <Button variant="outline" className="gap-2 hidden md:flex" onClick={() => navigate("/community")}>
+          <Button variant="outline" className="gap-2 hidden md:flex" onClick={() => router.push("/community")}>
             커뮤니티 전체보기 <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -185,7 +186,7 @@ const CommunitySection = () => {
           </div>
 
           <div className="mt-8 pt-6 border-t border-white/10 text-center md:hidden">
-            <Button variant="ghost" onClick={() => navigate("/community")}>
+            <Button variant="ghost" onClick={() => router.push("/community")}>
               더보기
             </Button>
           </div>
