@@ -1,4 +1,4 @@
-import { CART_STORAGE_KEY, DEMO_COUPONS } from './constants';
+import { CART_STORAGE_KEY, DEMO_COUPONS } from '@/lib/constants';
 
 export interface CartItem {
   id: string;
