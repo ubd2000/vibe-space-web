@@ -28,11 +28,14 @@ import avatarDetail1 from "@/assets/avatar-detail-1.png";
 import avatarDetail2 from "@/assets/avatar-detail-2.png";
 import avatarDetail3 from "@/assets/avatar-detail-3.png";
 import { cn } from "@/lib/utils";
+import { CreatorDM } from "@/components/creator/CreatorDM";
 
 export default function CreatorProfilePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const [activeTab, setActiveTab] = useState("selling");
     const [expandedPosts, setExpandedPosts] = useState<number[]>([]);
+    const [isDMOpen, setIsDMOpen] = useState(false);
+    const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
     const toggleComments = (postId: number) => {
         setExpandedPosts(prev =>
@@ -177,7 +180,7 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ id: s
                                         <UserPlus className="w-4 h-4" />
                                         팔로우
                                     </Button>
-                                    <Button variant="outline" className="gap-2">
+                                    <Button variant="outline" className="gap-2" onClick={() => setIsDMOpen(true)}>
                                         <MessageCircle className="w-4 h-4" />
                                         메시지
                                     </Button>
@@ -266,10 +269,26 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ id: s
                                 필터
                             </Button>
                             <div className="flex items-center gap-2 p-1 rounded-lg bg-muted/50">
-                                <button className="p-2 rounded bg-background shadow-sm text-foreground">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={cn(
+                                        "p-2 rounded transition-all",
+                                        viewMode === 'grid'
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
                                     <Grid className="w-4 h-4" />
                                 </button>
-                                <button className="p-2 rounded text-muted-foreground hover:text-foreground">
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={cn(
+                                        "p-2 rounded transition-all",
+                                        viewMode === 'list'
+                                            ? "bg-background shadow-sm text-foreground"
+                                            : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
                                     <List className="w-4 h-4" />
                                 </button>
                             </div>
@@ -278,91 +297,218 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ id: s
 
                     {/* Grid Content */}
                     {activeTab === "selling" && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
-                            {/* Add Item Button (Owner Only) */}
-                            {isOwner && (
-                                <Link href="/creator/products/new" className="group rounded-2xl overflow-hidden border-2 border-dashed border-white/10 hover:border-primary/50 flex flex-col items-center justify-center min-h-[300px] transition-all duration-300 bg-white/5 hover:bg-white/10">
-                                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                                        <Plus className="w-8 h-8 text-primary" />
-                                    </div>
-                                    <h3 className="font-semibold text-foreground text-lg">새 작품 등록</h3>
-                                    <p className="text-sm text-muted-foreground mt-2">판매할 에셋을 업로드하세요</p>
-                                </Link>
-                            )}
-                            {items.map((item) => (
-                                <Link
-                                    key={item.id}
-                                    href={`/avatar/${item.id}`}
-                                    className="group rounded-2xl overflow-hidden glass hover:shadow-[0_0_30px_hsl(180_100%_50%/0.15)] transition-all duration-300"
-                                >
-                                    <div className="aspect-[4/3] overflow-hidden relative">
-                                        <Image
-                                            src={item.image}
-                                            alt={item.name}
-                                            fill
-                                            className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                        />
-                                        <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button className="w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-white/20">
-                                                <Heart className="w-4 h-4 text-white" />
-                                            </button>
-                                        </div>
-                                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-xs font-medium text-white">
-                                            {item.category}
-                                        </div>
-                                    </div>
-                                    <div className="p-4">
-                                        <h3 className="font-display font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
-                                            {item.name}
-                                        </h3>
-                                        <div className="flex items-center justify-between">
-                                            <span className="font-bold text-foreground">{item.price}</span>
-                                            <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                                                <Heart className="w-3 h-3" />
-                                                {item.likes}
+                        <>
+                            {viewMode === 'grid' ? (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
+                                    {/* Add Item Button (Owner Only) */}
+                                    {isOwner && (
+                                        <Link href="/creator/products/new" className="group rounded-2xl overflow-hidden border-2 border-dashed border-white/10 hover:border-primary/50 flex flex-col items-center justify-center min-h-[300px] transition-all duration-300 bg-white/5 hover:bg-white/10">
+                                            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                                                <Plus className="w-8 h-8 text-primary" />
                                             </div>
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
+                                            <h3 className="font-semibold text-foreground text-lg">새 작품 등록</h3>
+                                            <p className="text-sm text-muted-foreground mt-2">판매할 에셋을 업로드하세요</p>
+                                        </Link>
+                                    )}
+                                    {items.map((item) => (
+                                        <Link
+                                            key={item.id}
+                                            href={`/avatar/${item.id}`}
+                                            className="group rounded-2xl overflow-hidden glass hover:shadow-[0_0_30px_hsl(180_100%_50%/0.15)] transition-all duration-300"
+                                        >
+                                            <div className="aspect-[4/3] overflow-hidden relative">
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button className="w-8 h-8 rounded-full glass flex items-center justify-center hover:bg-white/20">
+                                                        <Heart className="w-4 h-4 text-white" />
+                                                    </button>
+                                                </div>
+                                                <div className="absolute bottom-3 left-3 px-2 py-1 rounded bg-black/60 backdrop-blur-md text-xs font-medium text-white">
+                                                    {item.category}
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <h3 className="font-display font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
+                                                    {item.name}
+                                                </h3>
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-bold text-foreground">{item.price}</span>
+                                                    <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                                                        <Heart className="w-3 h-3" />
+                                                        {item.likes}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="space-y-4 animate-fade-in">
+                                    {/* Add Item Button (List View) */}
+                                    {isOwner && (
+                                        <Link href="/creator/products/new" className="block w-full p-4 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 transition-all duration-300 bg-white/5 hover:bg-white/10 text-center cursor-pointer">
+                                            <div className="flex items-center justify-center gap-2 text-muted-foreground group-hover:text-primary">
+                                                <Plus className="w-5 h-5" />
+                                                <span className="font-semibold">새 작품 등록하기</span>
+                                            </div>
+                                        </Link>
+                                    )}
+                                    {items.map((item) => (
+                                        <Link
+                                            key={item.id}
+                                            href={`/avatar/${item.id}`}
+                                            className="flex flex-col sm:flex-row gap-4 p-4 rounded-xl glass hover:bg-muted/40 transition-all duration-300 group"
+                                        >
+                                            <div className="relative w-full sm:w-48 aspect-[4/3] rounded-lg overflow-hidden flex-shrink-0">
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-[10px] font-medium text-white">
+                                                    {item.category}
+                                                </div>
+                                            </div>
+                                            <div className="flex-1 flex flex-col justify-between py-1">
+                                                <div>
+                                                    <div className="flex items-start justify-between">
+                                                        <h3 className="font-display font-bold text-lg text-foreground group-hover:text-primary transition-colors mb-2">
+                                                            {item.name}
+                                                        </h3>
+                                                        <button className="w-8 h-8 rounded-full hover:bg-muted flex items-center justify-center -mr-2">
+                                                            <Heart className="w-4 h-4 text-muted-foreground hover:text-red-500 transition-colors" />
+                                                        </button>
+                                                    </div>
+                                                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                                                        이 작품은 크리에이터의 독창적인 감각이 돋보이는 3D 에셋입니다. 다양한 표정과 모션이 포함되어 있으며, VRChat 및 게임 엔진에서 즉시 사용 가능합니다.
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center justify-between mt-auto">
+                                                    <span className="font-display font-bold text-xl text-primary">{item.price}</span>
+                                                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                        <div className="flex items-center gap-1">
+                                                            <Heart className="w-4 h-4" />
+                                                            {item.likes}
+                                                        </div>
+                                                        <div className="flex items-center gap-1">
+                                                            <MessageCircle className="w-4 h-4" />
+                                                            12
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {activeTab === "portfolio" && (
-                        <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 animate-fade-in">
-                            {/* Add Portfolio Button (Owner Only) */}
-                            {isOwner && (
-                                <Link href="/creator/portfolio/new" className="break-inside-avoid rounded-2xl overflow-hidden border-2 border-dashed border-white/10 hover:border-primary/50 p-8 flex flex-col items-center justify-center text-center transition-all duration-300 bg-white/5 hover:bg-white/10 mb-6 cursor-pointer">
-                                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                                        <Plus className="w-6 h-6 text-primary" />
-                                    </div>
-                                    <h3 className="font-semibold text-foreground">포트폴리오 추가</h3>
-                                    <p className="text-sm text-muted-foreground mt-1">멋진 작업물을 공유해보세요</p>
-                                </Link>
+                        <>
+                            {viewMode === 'grid' ? (
+                                <div className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6 animate-fade-in">
+                                    {/* Add Portfolio Button (Owner Only) */}
+                                    {isOwner && (
+                                        <Link href="/creator/portfolio/new" className="break-inside-avoid rounded-2xl overflow-hidden border-2 border-dashed border-white/10 hover:border-primary/50 p-8 flex flex-col items-center justify-center text-center transition-all duration-300 bg-white/5 hover:bg-white/10 mb-6 cursor-pointer">
+                                            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                                                <Plus className="w-6 h-6 text-primary" />
+                                            </div>
+                                            <h3 className="font-semibold text-foreground">포트폴리오 추가</h3>
+                                            <p className="text-sm text-muted-foreground mt-1">멋진 작업물을 공유해보세요</p>
+                                        </Link>
+                                    )}
+                                    {portfolioItems.map((item) => (
+                                        <Link
+                                            href={`/portfolio/${item.id}`}
+                                            key={item.id}
+                                            className="break-inside-avoid rounded-2xl overflow-hidden glass hover:shadow-lg transition-all duration-300 group block"
+                                        >
+                                            <div className="relative w-full h-auto"> {/* Hack for Image with unknown height in masonry layout */}
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.title}
+                                                    width={0}
+                                                    height={0}
+                                                    sizes="100vw"
+                                                    className="w-full h-auto object-cover"
+                                                />
+                                            </div>
+                                            <div className="p-4">
+                                                <h3 className="font-semibold text-foreground">{item.title}</h3>
+                                                <p className="text-sm text-primary">{item.type}</p>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="space-y-6 animate-fade-in">
+                                    {/* Add Portfolio Button (List View) */}
+                                    {isOwner && (
+                                        <Link href="/creator/portfolio/new" className="block w-full p-6 rounded-xl border-2 border-dashed border-white/10 hover:border-primary/50 transition-all duration-300 bg-white/5 hover:bg-white/10 text-center cursor-pointer mb-6">
+                                            <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground group-hover:text-primary">
+                                                <Plus className="w-6 h-6" />
+                                                <span className="font-semibold text-lg">새 포트폴리오 추가</span>
+                                                <span className="text-sm">멋진 작업 과정을 공유해보세요</span>
+                                            </div>
+                                        </Link>
+                                    )}
+                                    {portfolioItems.map((item) => (
+                                        <Link
+                                            href={`/portfolio/${item.id}`}
+                                            key={item.id}
+                                            className="block p-6 rounded-2xl glass hover:bg-muted/40 transition-all duration-300 group"
+                                        >
+                                            <div className="flex flex-col md:flex-row gap-6">
+                                                <div className="w-full md:w-64 aspect-video rounded-lg overflow-hidden relative flex-shrink-0">
+                                                    <Image
+                                                        src={item.image}
+                                                        alt={item.title}
+                                                        fill
+                                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                                    />
+                                                </div>
+                                                <div className="flex-1 flex flex-col">
+                                                    <div className="flex items-center justify-between mb-2">
+                                                        <span className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-bold">
+                                                            {item.type}
+                                                        </span>
+                                                        <span className="text-xs text-muted-foreground">2024.03.15</span>
+                                                    </div>
+                                                    <h3 className="font-display font-bold text-xl text-foreground mb-3 group-hover:text-primary transition-colors">
+                                                        {item.title}
+                                                    </h3>
+                                                    <p className="text-muted-foreground line-clamp-2 md:line-clamp-3 mb-4 flex-1">
+                                                        작업 과정 비하인드 스토리와 사용된 툴, 그리고 구상 단계의 스케치들을 공유합니다. 이 프로젝트를 통해 어떤 영감을 받았는지 확인해보세요.
+                                                    </p>
+
+                                                    <div className="flex items-center gap-4 border-t border-border pt-4 text-sm text-muted-foreground mt-auto">
+                                                        <div className="flex items-center gap-1 hover:text-foreground">
+                                                            <ThumbsUp className="w-4 h-4" />
+                                                            좋아요 45
+                                                        </div>
+                                                        <div className="flex items-center gap-1 hover:text-foreground">
+                                                            <MessageCircle className="w-4 h-4" />
+                                                            댓글 12
+                                                        </div>
+                                                        <div className="flex items-center gap-1 ml-auto hover:text-foreground">
+                                                            <Share2 className="w-4 h-4" />
+                                                            공유
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
+                                    ))}
+                                </div>
                             )}
-                            {portfolioItems.map((item) => (
-                                <Link
-                                    href={`/portfolio/${item.id}`}
-                                    key={item.id}
-                                    className="break-inside-avoid rounded-2xl overflow-hidden glass hover:shadow-lg transition-all duration-300 group block"
-                                >
-                                    <div className="relative w-full h-auto"> {/* Hack for Image with unknown height in masonry layout */}
-                                        <Image
-                                            src={item.image}
-                                            alt={item.title}
-                                            width={0}
-                                            height={0}
-                                            sizes="100vw"
-                                            className="w-full h-auto object-cover"
-                                        />
-                                    </div>
-                                    <div className="p-4">
-                                        <h3 className="font-semibold text-foreground">{item.title}</h3>
-                                        <p className="text-sm text-primary">{item.type}</p>
-                                    </div>
-                                </Link>
-                            ))}
-                        </div>
+                        </>
                     )}
 
                     {activeTab === "community" && (
@@ -507,6 +653,12 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ id: s
                 </div>
             </main>
             <Footer />
+            <CreatorDM
+                isOpen={isDMOpen}
+                onOpenChange={setIsDMOpen}
+                creatorName={creator.name}
+                creatorAvatar={creator.avatar}
+            />
         </div>
     );
 }

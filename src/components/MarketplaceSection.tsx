@@ -6,6 +6,7 @@ import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
 import avatar4 from "@/assets/avatar-4.png";
+import { CATEGORIES } from "@/lib/constants";
 
 interface AvatarCardProps {
   image: string | StaticImageData;
@@ -78,7 +79,7 @@ const MarketplaceSection = () => {
     { image: avatar3, name: "다크 나이트", creator: "ShadowForge", price: "₩55,000", likes: 378, views: 1789 },
   ];
 
-  const categories = ["전체", "VTuber", "게임", "판타지", "사이버펑크", "귀여움"];
+  const categories = ["전체", ...CATEGORIES.map(c => c.name)];
 
   return (
     <section id="marketplace" className="py-20 relative">
@@ -89,10 +90,10 @@ const MarketplaceSection = () => {
         {/* Header */}
         <div className="text-center mb-12 animate-fade-in">
           <h2 className="font-display text-3xl md:text-5xl font-bold mb-4">
-            <span className="gradient-text">인기 아바타</span>
+            <span className="gradient-text">트렌딩 에셋</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            전 세계 크리에이터들이 만든 독창적인 버츄얼 아바타를 만나보세요
+            3D 모델, 텍스쳐, 그리고 매력적인 2D 작품들을 만나보세요
           </p>
         </div>
 

@@ -26,7 +26,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
                 <span className="font-display font-bold text-primary-foreground text-lg">V</span>
               </div>
-              <span className="font-display font-bold text-xl gradient-text">VirtuMall</span>
+              <span className="font-display font-bold text-xl gradient-text">Vibe Space</span>
             </div>
             <p className="text-muted-foreground mb-6 max-w-sm">
               버츄얼 아바타의 모든 것. 제작부터 판매까지, 크리에이터와 팬을 연결하는 최고의 플랫폼.
@@ -68,7 +68,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 VirtuMall. All rights reserved.
+            © 2024 Vibe Space. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground flex items-center gap-1">
             Made with <Heart className="w-4 h-4 text-accent fill-accent" /> for Virtual Creators

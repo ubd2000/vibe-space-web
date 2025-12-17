@@ -29,25 +29,8 @@ const allItems = [
     { id: 12, image: avatar4, name: "고딕 롤리타", creator: "DarkCute", price: "₩36,000", likes: 890, views: 5600, category: "고딕" },
 ];
 
-// Expanded Category Structure similar to Booth
-const categoryGroups = [
-    {
-        title: "3D 모델",
-        items: ["전체", "아바타", "의상", "액세서리", "소품/무기"]
-    },
-    {
-        title: "텍스처/재질",
-        items: ["헤어", "피부", "눈동자", "의상 텍스처"]
-    },
-    {
-        title: "게임 제작",
-        items: ["배경/건물", "이펙트", "인터페이스"]
-    },
-    {
-        title: "보이스/사운드",
-        items: ["효과음", "보이스팩", "BGM"]
-    }
-];
+import { CATEGORIES } from "@/lib/constants";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export default function MarketplacePage() {
     const [selectedCategory, setSelectedCategory] = useState("전체");
@@ -95,26 +78,41 @@ export default function MarketplacePage() {
                         {/* Left Sidebar (Booth Style) */}
                         <aside className="hidden lg:block w-64 shrink-0">
                             <div className="sticky top-24 space-y-8">
-                                {categoryGroups.map((group, groupIndex) => (
-                                    <div key={groupIndex} className="bg-card/30 rounded-xl p-4 border border-white/5">
+                                {CATEGORIES.map((category) => (
+                                    <div key={category.name} className="bg-card/30 rounded-xl p-4 border border-white/5">
                                         <h3 className="font-bold text-sm text-foreground/80 mb-3 flex items-center gap-2">
-                                            {group.title}
+                                            {category.name}
                                         </h3>
-                                        <ul className="space-y-1">
-                                            {group.items.map((item) => (
-                                                <li key={item}>
+                                        <div className="space-y-4">
+                                            {category.subcategories.map((sub) => (
+                                                <div key={sub.name}>
                                                     <button
-                                                        onClick={() => setSelectedCategory(item)}
-                                                        className={`w-full text-left text-sm py-1.5 px-2 rounded-md transition-colors ${selectedCategory === item
-                                                            ? "bg-primary/10 text-primary font-medium"
+                                                        onClick={() => setSelectedCategory(sub.name)}
+                                                        className={`w-full text-left text-xs font-semibold py-1 px-2 rounded-md mb-1 transition-colors flex items-center justify-between ${selectedCategory === sub.name
+                                                            ? "bg-primary/20 text-primary"
                                                             : "text-muted-foreground hover:bg-white/5 hover:text-foreground"
                                                             }`}
                                                     >
-                                                        {item}
+                                                        {sub.name}
+                                                        {selectedCategory === sub.name && <ChevronRight className="w-3 h-3" />}
                                                     </button>
-                                                </li>
+                                                    <div className="pl-3 border-l border-white/10 space-y-1">
+                                                        {sub.details.map((detail) => (
+                                                            <button
+                                                                key={detail}
+                                                                onClick={() => setSelectedCategory(detail)}
+                                                                className={`w-full text-left text-[11px] py-1 px-2 rounded-md transition-colors ${selectedCategory === detail
+                                                                    ? "text-primary font-medium"
+                                                                    : "text-muted-foreground hover:text-foreground"
+                                                                    }`}
+                                                            >
+                                                                {detail}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             ))}
-                                        </ul>
+                                        </div>
                                     </div>
                                 ))}
 

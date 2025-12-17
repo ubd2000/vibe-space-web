@@ -18,22 +18,20 @@ const HeroSection = () => {
           {/* Text Content */}
           <div className="text-center lg:text-left space-y-6 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-sm">
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">버츄얼 아바타의 새로운 세계</span>
+              <span className="text-muted-foreground">3D 에셋 & 2D 일러스트 마켓</span>
             </div>
 
             <h1 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-              <span className="text-foreground">당신만의</span>
+              <span className="text-foreground">상상 속의</span>
               <br />
-              <span className="gradient-text">버츄얼 아바타</span>
+              <span className="gradient-text">모든 바이브</span>
               <br />
-              <span className="text-foreground">를 만나보세요</span>
+              <span className="text-foreground">를 현실로</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0">
-              전 세계 크리에이터들의 독창적인 아바타를 발견하고,
-              나만의 아바타를 제작하여 판매하세요.
-              버츄얼 커뮤니티와 함께 성장하세요.
+              고퀄리티 3D 모델, VRChat 아바타부터 유니크한 2D 일러스트까지.
+              크리에이터의 감각적인 에셋을 발견하고 나만의 공간을 채워보세요.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -54,12 +52,12 @@ const HeroSection = () => {
             <div className="flex items-center gap-8 justify-center lg:justify-start pt-6">
               <div className="text-center">
                 <p className="font-display text-2xl md:text-3xl font-bold text-primary">10K+</p>
-                <p className="text-sm text-muted-foreground">아바타</p>
+                <p className="text-sm text-muted-foreground">3D 모델</p>
               </div>
               <div className="w-px h-12 bg-border" />
               <div className="text-center">
                 <p className="font-display text-2xl md:text-3xl font-bold text-secondary">5K+</p>
-                <p className="text-sm text-muted-foreground">크리에이터</p>
+                <p className="text-sm text-muted-foreground">일러스트</p>
               </div>
               <div className="w-px h-12 bg-border" />
               <div className="text-center">

@@ -211,7 +211,7 @@ export default function CreatorsPage() {
                                 <p className="text-muted-foreground">
                                     나만의 아바타를 판매하고 전 세계 팬들과 소통하세요.
                                     <br />
-                                    VirtuMall이 당신의 창작 활동을 지원합니다.
+                                    Vibe Space가 당신의 창작 활동을 지원합니다.
                                 </p>
                             </div>
                             <Link href="/become-creator">

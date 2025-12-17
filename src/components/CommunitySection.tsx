@@ -110,7 +110,7 @@ const allMockPosts = [
 const categories = [
   { id: "free", name: "자유게시판", searchKey: "자유", desc: "자유롭게 이야기를 나누는 공간" },
   { id: "info", name: "정보/팁", searchKey: "정보/팁", desc: "유용한 정보와 팁을 공유하는 공간" },
-  { id: "showcase", name: "아바타 자랑", searchKey: "아바타", desc: "나만의 멋진 아바타를 뽐내는 공간" },
+  { id: "showcase", name: "작업물 갤러리", searchKey: "아바타", desc: "나만의 멋진 작업물을 뽐내는 공간" },
 ];
 
 const CommunitySection = () => {

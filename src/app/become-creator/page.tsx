@@ -49,7 +49,7 @@ export default function BecomeCreatorPage() {
                                     <span className="text-primary">수익</span>으로 만드세요
                                 </h1>
                                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                                    VirtuMall은 전 세계 수백만 명의 사용자가 당신의 아바타와 아이템을 기다리고 있는 공간입니다.
+                                    Vibe Space는 당신의 3D 모델, 아바타, 그리고 일러스트를 기다리는 전 세계 팬들과 만나는 공간입니다.
                                 </p>
                                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
                                     <Button
@@ -84,7 +84,7 @@ export default function BecomeCreatorPage() {
                         <section className="py-24 relative">
                             <div className="container mx-auto px-4">
                                 <div className="text-center mb-16">
-                                    <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display">왜 VirtuMall인가요?</h2>
+                                    <h2 className="text-3xl md:text-4xl font-bold mb-4 font-display">왜 Vibe Space인가요?</h2>
                                     <p className="text-muted-foreground text-lg">
                                         창작에만 집중하세요. 나머지는 저희가 해결해 드립니다.
                                     </p>
@@ -164,7 +164,7 @@ export default function BecomeCreatorPage() {
                                         <Label htmlFor="introduction" className="text-base">소개글</Label>
                                         <Textarea
                                             id="introduction"
-                                            placeholder="어떤 스타일의 에셋을 제작하시나요? 간단히 소개해주세요."
+                                            placeholder="어떤 스타일의 에셋을 제작하시나요? (예: VRChat 아바타, 게임용 3D 모델, 2D 캐릭터 일러스트 등)"
                                             className="bg-background/50 min-h-[150px] resize-none"
                                             required
                                         />
@@ -173,7 +173,7 @@ export default function BecomeCreatorPage() {
                                     <div className="flex items-start gap-3 p-4 rounded-lg bg-secondary/10 border border-secondary/20">
                                         <Checkbox id="terms" required className="mt-1" />
                                         <Label htmlFor="terms" className="text-sm leading-relaxed cursor-pointer">
-                                            (필수) VirtuMall 크리에이터 이용약관 및 판매자 정책에 동의합니다.
+                                            (필수) Vibe Space 크리에이터 이용약관 및 판매자 정책에 동의합니다.
                                             판매 수익의 70%는 크리에이터에게 정산되며, 저작권 침해 시 계정이 정지될 수 있습니다.
                                         </Label>
                                     </div>

@@ -44,7 +44,7 @@ export default function SignupPage() {
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_hsl(180_100%_50%/0.3)]">
                             <span className="font-display font-bold text-primary-foreground text-xl">V</span>
                         </div>
-                        <h1 className="font-display text-2xl font-bold mb-2">VirtuMall과 함께하세요</h1>
+                        <h1 className="font-display text-2xl font-bold mb-2">Vibe Space와 함께하세요</h1>
                         <p className="text-muted-foreground">나만의 아바타 세계를 발견할 준비 되셨나요?</p>
                     </div>
 

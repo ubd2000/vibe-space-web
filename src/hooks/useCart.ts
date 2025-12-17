@@ -26,7 +26,7 @@ export function useCart() {
   // Sync with localStorage changes from other tabs
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
-      if (e.key === 'virtumall-cart') {
+      if (e.key === 'vibespace-cart') {
         setCart(getCart());
       }
     };

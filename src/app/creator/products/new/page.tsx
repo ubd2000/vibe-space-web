@@ -14,10 +14,12 @@ import {
     Tags,
     CheckCircle,
     Plus,
-    Box
+    Box,
+    ChevronRight
 } from "lucide-react";
 import { toast } from "sonner";
 import "react-quill-new/dist/quill.snow.css";
+import { CATEGORIES, SUGGESTED_TAGS } from "@/lib/constants";
 
 // Dynamic import for ReactQuill
 const ReactQuill = dynamic(() => import("react-quill-new"), {
@@ -32,6 +34,22 @@ export default function ProductUploadPage() {
     const [tagInput, setTagInput] = useState("");
     const [features, setFeatures] = useState<string[]>([]);
     const [featureInput, setFeatureInput] = useState("");
+
+    // Category State
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedSubCategory, setSelectedSubCategory] = useState("");
+    const [selectedDetail, setSelectedDetail] = useState("");
+
+    const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedCategory(e.target.value);
+        setSelectedSubCategory("");
+        setSelectedDetail("");
+    };
+
+    const handleSubCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedSubCategory(e.target.value);
+        setSelectedDetail("");
+    };
     const [description, setDescription] = useState(`
       <h2>✨ 네온 드리머 상세 소개</h2>
       <p>안녕하세요! 사이버펑크 세계관을 기반으로 제작된 오리지널 아바타 '네온 드리머'입니다.</p>
@@ -114,14 +132,47 @@ export default function ProductUploadPage() {
                             <Input id="title" placeholder="예: 사이버펑크 네온 시티 아바타" className="h-12 bg-background/50" required maxLength={100} />
                         </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="category">카테고리</Label>
-                            <select id="category" className="w-full h-12 rounded-md border border-input bg-background/50 px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                                <option value="vtuber">VTuber 아바타</option>
-                                <option value="game_asset">게임 에셋</option>
-                                <option value="vrchat">VRChat 아바타</option>
-                                <option value="clothing">의상/액세서리</option>
-                            </select>
+                        <div className="space-y-2 col-span-2">
+                            <Label>카테고리</Label>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                {/* 1 Depth */}
+                                <select
+                                    className="w-full h-12 rounded-md border border-input bg-background/50 px-3 py-2 text-sm"
+                                    value={selectedCategory}
+                                    onChange={handleCategoryChange}
+                                >
+                                    <option value="">대분류 선택</option>
+                                    {CATEGORIES.map((cat) => (
+                                        <option key={cat.name} value={cat.name}>{cat.name}</option>
+                                    ))}
+                                </select>
+
+                                {/* 2 Depth */}
+                                <select
+                                    className="w-full h-12 rounded-md border border-input bg-background/50 px-3 py-2 text-sm"
+                                    value={selectedSubCategory}
+                                    onChange={handleSubCategoryChange}
+                                    disabled={!selectedCategory}
+                                >
+                                    <option value="">중분류 선택</option>
+                                    {selectedCategory && CATEGORIES.find(c => c.name === selectedCategory)?.subcategories.map((sub) => (
+                                        <option key={sub.name} value={sub.name}>{sub.name}</option>
+                                    ))}
+                                </select>
+
+                                {/* 3 Depth */}
+                                <select
+                                    className="w-full h-12 rounded-md border border-input bg-background/50 px-3 py-2 text-sm"
+                                    value={selectedDetail}
+                                    onChange={(e) => setSelectedDetail(e.target.value)}
+                                    disabled={!selectedSubCategory}
+                                >
+                                    <option value="">소분류 선택</option>
+                                    {selectedSubCategory && CATEGORIES.find(c => c.name === selectedCategory)?.subcategories.find(s => s.name === selectedSubCategory)?.details.map((detail) => (
+                                        <option key={detail} value={detail}>{detail}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
@@ -242,7 +293,20 @@ export default function ProductUploadPage() {
                             className="bg-background/50"
                             maxLength={20}
                         />
-                        <div className="flex flex-wrap gap-2 mt-2">
+                        <div className="text-xs text-muted-foreground mt-2 mb-2">추천 태그:</div>
+                        <div className="flex flex-wrap gap-2 mb-4">
+                            {SUGGESTED_TAGS.map((tag) => (
+                                <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => !tags.includes(tag) && setTags([...tags, tag])}
+                                    className={`px-2 py-1 rounded-md text-xs border transition-colors ${tags.includes(tag) ? 'bg-primary/20 border-primary text-primary' : 'bg-secondary/5 border-white/5 hover:bg-secondary/10'}`}
+                                >
+                                    {tag}
+                                </button>
+                            ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
                             {tags.map((tag) => (
                                 <span key={tag} className="px-3 py-1 rounded-full bg-secondary/20 text-secondary-foreground text-sm flex items-center gap-2">
                                     #{tag}

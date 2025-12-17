@@ -10,9 +10,44 @@ import { Switch } from "@/components/ui/switch";
 import { User, Lock, Bell, Shield, CreditCard, LogOut, Loader2, Camera } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 
 export default function BuyerSettingsPage() {
     const [isLoading, setIsLoading] = useState(false);
+    const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+    const [passwordData, setPasswordData] = useState({
+        current: "",
+        new: "",
+        confirm: ""
+    });
+
+    const handlePasswordChange = () => {
+        if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+            toast.error("모든 필드를 입력해주세요.");
+            return;
+        }
+        if (passwordData.new !== passwordData.confirm) {
+            toast.error("새 비밀번호가 일치하지 않습니다.");
+            return;
+        }
+
+        setIsLoading(true);
+        // Simulate API call
+        setTimeout(() => {
+            setIsLoading(false);
+            setIsPasswordDialogOpen(false);
+            setPasswordData({ current: "", new: "", confirm: "" });
+            toast.success("비밀번호가 성공적으로 변경되었습니다.");
+        }, 1500);
+    };
 
     const handleSave = () => {
         setIsLoading(true);
@@ -108,7 +143,54 @@ export default function BuyerSettingsPage() {
                                             <p className="text-sm text-muted-foreground">마지막 변경: 3개월 전</p>
                                         </div>
                                     </div>
-                                    <Button variant="outline" size="sm">변경</Button>
+                                    <Dialog open={isPasswordDialogOpen} onOpenChange={setIsPasswordDialogOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline" size="sm">변경</Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-[425px]">
+                                            <DialogHeader>
+                                                <DialogTitle>비밀번호 변경</DialogTitle>
+                                                <DialogDescription>
+                                                    계정 보안을 위해 주기적으로 비밀번호를 변경해주세요.
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="grid gap-4 py-4">
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="current-password">현재 비밀번호</Label>
+                                                    <Input
+                                                        id="current-password"
+                                                        type="password"
+                                                        value={passwordData.current}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, current: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="new-password">새 비밀번호</Label>
+                                                    <Input
+                                                        id="new-password"
+                                                        type="password"
+                                                        value={passwordData.new}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, new: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="grid gap-2">
+                                                    <Label htmlFor="confirm-password">새 비밀번호 확인</Label>
+                                                    <Input
+                                                        id="confirm-password"
+                                                        type="password"
+                                                        value={passwordData.confirm}
+                                                        onChange={(e) => setPasswordData({ ...passwordData, confirm: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <DialogFooter>
+                                                <Button type="submit" onClick={handlePasswordChange} disabled={isLoading}>
+                                                    {isLoading && <Loader2 className="mr-2 w-4 h-4 animate-spin" />}
+                                                    비밀번호 변경
+                                                </Button>
+                                            </DialogFooter>
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
 
                                 <div className="flex items-center justify-between p-4 rounded-lg border border-white/10 bg-white/5">
@@ -168,6 +250,6 @@ export default function BuyerSettingsPage() {
                     </div>
                 </TabsContent>
             </Tabs>
-        </div>
+        </div >
     );
 }

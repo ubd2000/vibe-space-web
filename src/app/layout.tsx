@@ -7,8 +7,8 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
 
 export const metadata: Metadata = {
-    title: "Avatar Vibe Space",
-    description: "Premium Digital Asset Marketplace",
+    title: "Vibe Space",
+    description: "Premium Digital Asset Marketplace for Creators & Fans",
 };
 
 export default function RootLayout({

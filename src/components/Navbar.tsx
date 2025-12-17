@@ -6,6 +6,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, ShoppingBag, Users, Palette, ShoppingCart } from "lucide-react";
 import { useCart } from "@/hooks/useCart";
+import { CATEGORIES } from "@/lib/constants";
+import { ChevronDown } from "lucide-react";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,7 +15,6 @@ const Navbar = () => {
   const pathname = usePathname();
 
   const navLinks = [
-    { name: "마켓플레이스", href: "/marketplace", icon: ShoppingBag },
     { name: "크리에이터", href: "/creators", icon: Palette },
     { name: "커뮤니티", href: "/community", icon: Users },
   ];
@@ -27,11 +28,51 @@ const Navbar = () => {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary via-secondary to-accent flex items-center justify-center">
               <span className="font-display font-bold text-primary-foreground text-lg">V</span>
             </div>
-            <span className="font-display font-bold text-xl gradient-text">VirtuMall</span>
+            <span className="font-display font-bold text-xl gradient-text">Vibe Space</span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
+            {/* Marketplace Mega Menu Trigger */}
+            <div className="relative group">
+              <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors py-2">
+                <ShoppingBag className="w-4 h-4" />
+                <span>마켓플레이스</span>
+                <ChevronDown className="w-3 h-3 transition-transform group-hover:rotate-180" />
+              </button>
+
+              {/* Mega Menu Content */}
+              <div className="absolute top-full left-0 w-[600px] p-6 rounded-xl glass border border-white/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                <div className="grid grid-cols-3 gap-8">
+                  {CATEGORIES.map((category) => (
+                    <div key={category.name}>
+                      <h3 className="font-bold text-primary mb-3 text-sm">{category.name}</h3>
+                      <div className="space-y-4">
+                        {category.subcategories.map((sub) => (
+                          <div key={sub.name}>
+                            <Link href={`/marketplace?category=${category.name}&subcategory=${sub.name}`} className="block text-xs font-semibold text-foreground hover:text-primary mb-1">
+                              {sub.name}
+                            </Link>
+                            <div className="flex flex-col gap-1 pl-2 border-l border-white/10">
+                              {sub.details.map((detail) => (
+                                <Link
+                                  key={detail}
+                                  href={`/marketplace?category=${category.name}&subcategory=${sub.name}&detail=${detail}`}
+                                  className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                  {detail}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             {navLinks.map((link) => (
               <Link
                 key={link.name}

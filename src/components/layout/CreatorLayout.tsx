@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, BarChart3, Wallet, LogOut, Store } from "lucide-react";
+import { LayoutDashboard, Package, BarChart3, Wallet, LogOut, Store, Image as ImageIcon } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -12,6 +12,7 @@ const CreatorLayout = ({ children }: { children: React.ReactNode }) => {
     const menuItems = [
         { icon: LayoutDashboard, label: "대시보드", path: "/creator/dashboard" },
         { icon: Package, label: "상품 관리", path: "/creator/products" },
+        { icon: ImageIcon, label: "포트폴리오 관리", path: "/creator/portfolio" },
         { icon: BarChart3, label: "판매 분석", path: "/creator/analytics" },
         { icon: Wallet, label: "정산 관리", path: "/creator/finance" },
     ];
