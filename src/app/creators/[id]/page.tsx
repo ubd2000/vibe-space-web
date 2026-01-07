@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from "react";
+import { useState, use, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Heart,
@@ -46,22 +46,74 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ id: s
     };
 
     const decodedId = decodeURIComponent(id);
-    const isOwner = decodedId === "me" || decodedId === "PixelMaster";
+    const { CreatorService } = require("@/services/creator.service");
+    const { PortfolioService } = require("@/services/portfolio.service");
+
+    const [creatorProfile, setCreatorProfile] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [portfolio, setPortfolio] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchCreator = async () => {
+            // If "me" handle separately? For now assume public profile via ID/Name
+            // Backend uses numeric ID for creators usually, but route is [id] often used as ID.
+            // If route is /creators/PixelMaster (name), we need search by name?
+            // Or we just assume ID for now.
+            // Let's assume ID is passed.
+            try {
+                setLoading(true);
+                // TODO: Handle name vs ID resolution if needed. For now assume ID.
+                const data = await CreatorService.getById(decodedId);
+                setCreatorProfile(data);
+
+                // Fetch Portfolio
+                try {
+                    const portfolioData = await PortfolioService.getByCreatorId(data.id);
+                    setPortfolio(portfolioData);
+                } catch (e) { console.warn("No portfolio found", e); }
+
+            } catch (error) {
+                console.error("Failed to load creator:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (decodedId !== "me") {
+            fetchCreator();
+        }
+    }, [decodedId]);
+
+    const isOwner = decodedId === "me" || (creatorProfile && creatorProfile.displayName === "PixelMaster"); // Mock check
 
     // Mock Data
-    const creator = {
-        name: isOwner ? "PixelMaster" : (decodedId || "Unknown"),
-        avatar: avatar1,
+    // Mock Data Fallback or Mapping
+    const creator = creatorProfile ? {
+        name: creatorProfile.displayName,
+        avatar: creatorProfile.avatarUrl || avatar1,
         coverImage: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=2070&auto=format&fit=crop",
-        bio: "5년차 버츄얼 아바타 전문 크리에이터입니다. 사이버펑크와 판타지 스타일을 주로 작업합니다. 커미션은 DM 주세요!",
-        location: "Seoul, Korea",
-        followers: 12500,
-        following: 150,
-        sales: 234,
-        rating: 4.9,
-        verified: true,
-        tags: ["Live2D", "3D Modeling", "Character Design"]
+        bio: creatorProfile.description || "소개가 없습니다.",
+        location: "알 수 없음",
+        followers: creatorProfile.stats?.followers || 0,
+        following: 0,
+        sales: creatorProfile.stats?.totalSales || 0,
+        rating: creatorProfile.stats?.rating || 0,
+        verified: creatorProfile.verified,
+        tags: ["Creator"] // Mock
+    } : { // Fallback/Loading placeholder
+        name: "로딩 중...",
+        avatar: avatar1,
+        coverImage: "",
+        bio: "",
+        location: "",
+        followers: 0,
+        following: 0,
+        sales: 0,
+        rating: 0,
+        verified: false,
+        tags: []
     };
+
+    if (loading && decodedId !== "me") return <div className="min-h-screen flex items-center justify-center">로딩 중...</div>;
 
     const items = [
         { id: "1", name: "네온 드리머", image: avatarDetail1, price: "₩45,000", likes: 124, category: "VTuber" },
@@ -72,12 +124,14 @@ export default function CreatorProfilePage({ params }: { params: Promise<{ id: s
         { id: "6", name: "메카닉 솔저", image: avatarDetail3, price: "₩60,000", likes: 78, category: "Sci-Fi" },
     ];
 
-    const portfolioItems = [
+    const portfolioItems = portfolio.length > 0 ? portfolio.map(p => ({
+        id: p.id,
+        title: p.title,
+        image: p.imageUrl || "https://via.placeholder.com/800",
+        type: p.type
+    })) : [
+        // default fallback if empty?
         { id: 1, title: "Cyberpunk City Concept", image: "https://images.unsplash.com/photo-1615840287214-7ff58ee04896?auto=format&fit=crop&q=80&w=800", type: "Concept Art" },
-        { id: 2, title: "Character Sketch - Neon", image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800", type: "Sketch" },
-        { id: 3, title: "3D Modeling Process", image: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?auto=format&fit=crop&q=80&w=800", type: "3D Model" },
-        { id: 4, title: "Fantasy World Building", image: "https://images.unsplash.com/photo-1564053489984-317bbd824340?auto=format&fit=crop&q=80&w=800", type: "Environment" },
-        { id: 5, title: "VTuber Rigging Demo", image: "https://images.unsplash.com/photo-1626027376326-f4044af165ba?auto=format&fit=crop&q=80&w=800", type: "Live2D" },
     ];
 
     const communityPosts = [

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,17 +9,52 @@ import { Camera, Save, Upload, User, Globe, Twitter, Disc } from "lucide-react";
 import Image from "next/image";
 import avatar1 from "@/assets/avatar-1.png"; // Using existing asset as default
 
-export default function SettingsPage() {
-    const [isLoading, setIsLoading] = useState(false);
+import { useAuth } from "@/contexts/AuthContext";
+import { CreatorService } from "@/services/creator.service";
+import { toast } from "sonner"; // Assuming sonner is installed as seen in BuyerSettingsPage
 
-    const handleSave = (e: React.FormEvent) => {
+export default function SettingsPage() {
+    const { user } = useAuth();
+    const [isLoading, setIsLoading] = useState(false);
+    const [creator, setCreator] = useState<any>(null); // Replace any with Creator type if possible
+
+    useEffect(() => {
+        if (user) {
+            CreatorService.getByUserId(user.id).then(data => {
+                setCreator(data);
+            }).catch(err => console.error(err));
+        }
+    }, [user]);
+
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user) return;
         setIsLoading(true);
-        // Simulate save API call
-        setTimeout(() => {
+
+        try {
+            const formData = new FormData(e.currentTarget as HTMLFormElement);
+            const displayName = formData.get("shopName") as string;
+            const description = formData.get("bio") as string;
+
+            // In a real scenario, we would handle file uploads here too.
+            // For now, we update text fields.
+
+            const creatorData = await CreatorService.getByUserId(user.id);
+            if (creatorData) {
+                await CreatorService.update(creatorData.id, {
+                    displayName,
+                    description
+                });
+                toast.success("설정이 저장되었습니다!");
+                // Refresh local state
+                setCreator({ ...creatorData, displayName, description });
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("설정 저장에 실패했습니다.");
+        } finally {
             setIsLoading(false);
-            alert("설정이 저장되었습니다!");
-        }, 1000);
+        }
     };
 
     return (
@@ -60,7 +95,7 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-6">
                             <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-primary/20 group cursor-pointer">
                                 <Image
-                                    src={avatar1}
+                                    src={creator?.avatarUrl || user?.profileImageUrl || avatar1}
                                     alt="Avatar Preview"
                                     fill
                                     className="object-cover"
@@ -87,14 +122,21 @@ export default function SettingsPage() {
                     <div className="grid gap-6">
                         <div className="space-y-2">
                             <Label htmlFor="shopName">샵 이름 (활동명)</Label>
-                            <Input id="shopName" defaultValue="PixelMaster" placeholder="활동명을 입력하세요" className="bg-secondary/10" />
+                            <Input
+                                id="shopName"
+                                name="shopName"
+                                defaultValue={creator?.displayName || ""}
+                                placeholder="활동명을 입력하세요"
+                                className="bg-secondary/10"
+                            />
                         </div>
 
                         <div className="space-y-2">
                             <Label htmlFor="bio">소개글</Label>
                             <Textarea
                                 id="bio"
-                                defaultValue="5년차 버츄얼 아바타 전문 크리에이터입니다. 사이버펑크와 판타지 스타일을 주로 작업합니다."
+                                name="bio"
+                                defaultValue={creator?.description || ""}
                                 placeholder="자신을 소개하는 글을 작성하세요"
                                 className="min-h-[100px] bg-secondary/10 resize-none"
                             />

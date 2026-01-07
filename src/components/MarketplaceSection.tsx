@@ -1,14 +1,19 @@
-import { Heart, Eye, ShoppingCart } from "lucide-react";
+import { Heart, Eye, ArrowRight, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
 import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
-import avatar4 from "@/assets/avatar-4.png";
+import { useEffect, useState } from "react";
+import { Product, ProductService } from "@/services/product.service";
 import { CATEGORIES } from "@/lib/constants";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth.service";
 
 interface AvatarCardProps {
+  id: number | string;
   image: string | StaticImageData;
   name: string;
   creator: string;
@@ -18,10 +23,25 @@ interface AvatarCardProps {
   index: number;
 }
 
-const AvatarCard = ({ image, name, creator, price, likes, views, index }: AvatarCardProps) => {
+const AvatarCard = ({ id, image, name, creator, price, likes, views, index }: AvatarCardProps) => {
+  const router = useRouter();
+
+  const handleLike = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigation
+    const user = authService.getCurrentUser();
+    if (!user) {
+      if (confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) {
+        router.push("/login?returnUrl=/");
+      }
+      return;
+    }
+    // TODO: Call API to toggle like
+    alert("좋아요가 반영되었습니다!");
+  };
+
   return (
     <Link
-      href={`/avatar/${index + 1}`}
+      href={`/avatar/${id}`}
       className="group relative rounded-2xl overflow-hidden glass hover:scale-105 transition-all duration-500 animate-fade-in block"
       style={{ animationDelay: `${index * 0.1}s` }}
     >
@@ -36,16 +56,19 @@ const AvatarCard = ({ image, name, creator, price, likes, views, index }: Avatar
         <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-60" />
       </div>
 
-      {/* Overlay Actions */}
-      <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <button className="w-9 h-9 rounded-full glass flex items-center justify-center hover:bg-accent/20 transition-colors">
-          <Heart className="w-4 h-4 text-accent" />
+      {/* Like & View overlay */}
+      <div className="absolute top-3 right-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-x-4 group-hover:translate-x-0">
+        <button
+          onClick={handleLike}
+          className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white hover:bg-primary hover:text-black transition-colors"
+          title="찜하기"
+        >
+          <Heart className="w-4 h-4" />
         </button>
-        <button className="w-9 h-9 rounded-full glass flex items-center justify-center hover:bg-primary/20 transition-colors">
-          <ShoppingCart className="w-4 h-4 text-primary" />
-        </button>
+        <div className="w-8 h-8 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center text-white">
+          <Eye className="w-4 h-4" />
+        </div>
       </div>
-
       {/* Content */}
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <h3 className="font-display font-semibold text-lg text-foreground mb-1 truncate">{name}</h3>
@@ -68,18 +91,31 @@ const AvatarCard = ({ image, name, creator, price, likes, views, index }: Avatar
 };
 
 const MarketplaceSection = () => {
-  const avatars = [
-    { image: avatar1, name: "네온 드리머", creator: "PixelMaster", price: "₩25,000", likes: 234, views: 1250 },
-    { image: avatar2, name: "루나 엘프", creator: "MoonArtist", price: "₩35,000", likes: 456, views: 2340 },
-    { image: avatar3, name: "사이버 워리어", creator: "TechCreator", price: "₩45,000", likes: 312, views: 1890 },
-    { image: avatar4, name: "핑크 캣걸", creator: "KawaiiDev", price: "₩30,000", likes: 567, views: 3210 },
-    { image: avatar2, name: "얼음 공주", creator: "FrostArt", price: "₩40,000", likes: 289, views: 1567 },
-    { image: avatar1, name: "스타 보이", creator: "GalaxyMaker", price: "₩28,000", likes: 198, views: 987 },
-    { image: avatar4, name: "체리 블라썸", creator: "SakuraStudio", price: "₩32,000", likes: 421, views: 2100 },
-    { image: avatar3, name: "다크 나이트", creator: "ShadowForge", price: "₩55,000", likes: 378, views: 1789 },
-  ];
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await ProductService.getActive();
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   const categories = ["전체", ...CATEGORIES.map(c => c.name)];
+
+  const [visibleCount, setVisibleCount] = useState(8);
+
+  const handleLoadMore = () => {
+    setVisibleCount((prev) => prev + 8);
+  };
 
   return (
     <section id="marketplace" className="py-20 relative">
@@ -112,18 +148,36 @@ const MarketplaceSection = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {avatars.map((avatar, index) => (
-            <AvatarCard key={index} {...avatar} index={index} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {products.slice(0, visibleCount).map((product, index) => (
+              <AvatarCard
+                key={product.id}
+                id={product.id}
+                image={(product.images && product.images[0]) || avatar1} // Fallback image safety check
+                name={product.name}
+                creator={product.creator?.name || "알 수 없음"}
+                price={`₩${product.price.toLocaleString()}`}
+                likes={product.sales || 0} // Using sales as likes proxy for now or 0
+                views={(product.reviewCount || 0) * 10} // Mock views based on reviews
+                index={index}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Load More */}
-        <div className="text-center mt-12">
-          <Button variant="outline" size="lg">
-            더 많은 아바타 보기
-          </Button>
-        </div>
+        {visibleCount < products.length && (
+          <div className="text-center mt-12">
+            <Button variant="outline" size="lg" onClick={handleLoadMore}>
+              더 많은 아바타 보기
+            </Button>
+          </div>
+        )}
       </div>
     </section>
   );

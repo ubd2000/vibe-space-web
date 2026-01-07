@@ -7,19 +7,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, ArrowLeft, Github } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
+    const { login } = useAuth();
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate login
-        setTimeout(() => {
+        try {
+            const response = await login({
+                usernameOrEmail: email,
+                password: password
+            });
+
+            // Redirect based on role or default
+            if (response.role === "CREATOR") {
+                router.push("/creator/dashboard");
+            } else if (response.role === "ADMIN") {
+                router.push("/admin/dashboard");
+            } else {
+                router.push("/buyer/dashboard");
+            }
+        } catch (error) {
+            console.error("Login failed:", error);
+            alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해주세요.");
+        } finally {
             setLoading(false);
-            router.push("/buyer/dashboard");
-        }, 1000);
+        }
     };
 
     return (
@@ -61,6 +81,9 @@ export default function LoginPage() {
                                         type="email"
                                         placeholder="hello@example.com"
                                         className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
                                     />
                                 </div>
                             </div>
@@ -79,6 +102,9 @@ export default function LoginPage() {
                                         type="password"
                                         placeholder="••••••••"
                                         className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
                                     />
                                 </div>
                             </div>

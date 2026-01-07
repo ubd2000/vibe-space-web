@@ -7,19 +7,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, User, ArrowLeft, Github } from "lucide-react";
+import { authService } from "@/services/auth.service";
 
 export default function SignupPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        username: '',
+        fullName: '',
+        email: '',
+        password: ''
+    });
 
-    const handleSignup = (e: React.FormEvent) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [id]: value
+        }));
+    };
+
+    const handleSignup = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // Simulate signup
-        setTimeout(() => {
+        try {
+            await authService.register({
+                username: formData.username,
+                fullName: formData.fullName,
+                email: formData.email,
+                password: formData.password
+            });
+            // Success
+            alert('회원가입이 완료되었습니다. 로그인해주세요.');
+            router.push("/login");
+        } catch (error) {
+            console.error('Signup error:', error);
+            alert('회원가입 중 오류가 발생했습니다. 다시 시도해주세요.');
+        } finally {
             setLoading(false);
-            router.push("/");
-        }, 1500);
+        }
     };
 
     return (
@@ -53,15 +79,33 @@ export default function SignupPage() {
 
                         <form onSubmit={handleSignup} className="space-y-4 relative">
                             <div className="space-y-2">
-                                <Label htmlFor="name">이름 (닉네임)</Label>
+                                <Label htmlFor="fullName">이름</Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
-                                        id="name"
+                                        id="fullName"
                                         type="text"
                                         placeholder="홍길동"
                                         className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
                                         required
+                                        value={formData.fullName}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="username">닉네임 (아이디)</Label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        id="username"
+                                        type="text"
+                                        placeholder="vibez"
+                                        className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
+                                        required
+                                        value={formData.username}
+                                        onChange={handleChange}
                                     />
                                 </div>
                             </div>
@@ -76,6 +120,8 @@ export default function SignupPage() {
                                         placeholder="hello@example.com"
                                         className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
                                         required
+                                        value={formData.email}
+                                        onChange={handleChange}
                                     />
                                 </div>
                             </div>
@@ -90,6 +136,8 @@ export default function SignupPage() {
                                         placeholder="••••••••"
                                         className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
                                         required
+                                        value={formData.password}
+                                        onChange={handleChange}
                                     />
                                 </div>
                             </div>

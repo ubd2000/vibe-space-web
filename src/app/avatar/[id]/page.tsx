@@ -40,9 +40,40 @@ const AvatarDetailPage = () => {
     const id = params?.id as string;
     const router = useRouter();
     const { add } = useCart();
+
+    // State for product data
+    const [product, setProduct] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
     const [selectedImage, setSelectedImage] = useState(0);
     const [isLiked, setIsLiked] = useState(false);
     const [show3D, setShow3D] = useState(false);
+
+    // Import ProductService
+    const { ProductService } = require("@/services/product.service");
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            if (!id) return;
+            try {
+                setLoading(true);
+                // Try to fetch from API
+                // Note: If ID is "1", "2" etc from mocks, backend might not have them if using auto-increment sequence starting from 1 but different data.
+                // We will try fetching.
+                const data = await ProductService.getById(id);
+                setProduct(data);
+            } catch (error) {
+                console.error("Failed to load product:", error);
+                // If API fails (e.g. 404 for mock IDs), we might want to keep using mock data for demo purposes?
+                // For now, let's assume we want to show API data.
+                // But since user might use mock IDs from main page (if main page still used mock ids - oh wait main page uses real IDs now), 
+                // we should expect real IDs.
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProduct();
+    }, [id]);
 
     // Dynamic import for model-viewer to avoid SSR issues
     useEffect(() => {
@@ -50,65 +81,47 @@ const AvatarDetailPage = () => {
     }, []);
 
     // Mock data - in real app this would come from API
-    const avatar = {
-        id: id || "1",
-        name: "네온 드리머",
-        description: "사이버펑크 스타일의 버츄얼 아바타입니다. Live2D 리깅이 완료되어 있으며, 다양한 표정과 모션이 포함되어 있습니다. VTuber 데뷔에 최적화된 고퀄리티 아바타로, 시안과 마젠타의 아름다운 그라데이션 헤어가 특징입니다.",
-        price: "₩45,000",
-        originalPrice: "₩60,000",
-        discount: 25,
-        likes: 1234,
-        views: 5678,
-        sales: 89,
-        rating: 4.9,
-        reviewCount: 67,
-        images: [heroAvatar, avatarDetail1, avatarDetail2, avatarDetail3],
-        category: "VTuber",
-        tags: ["사이버펑크", "Live2D", "여성", "그라데이션"],
+    // Fallback/Default data structure if product is loading or mapped
+    const avatar = product ? {
+        id: product.id.toString(),
+        name: product.name,
+        description: product.description,
+        price: `₩${product.price.toLocaleString()}`,
+        originalPrice: product.originalPrice ? `₩${product.originalPrice.toLocaleString()}` : undefined,
+        discount: product.discount || 0,
+        likes: product.sales || 0, // Mock likes with sales
+        views: product.reviewCount * 10, // Mock
+        sales: product.sales,
+        rating: product.rating,
+        reviewCount: product.reviewCount,
+        images: product.images && product.images.length > 0 ? product.images : [heroAvatar],
+        category: product.category?.name || "미분류",
+        tags: product.tags || [],
         features: [
-            "Live2D 리깅 완료",
+            "Live2D 리깅 완료", // Mock features
             "표정 12종 포함",
-            "기본 모션 8종",
-            "PSD 원본 파일 제공",
-            "상업적 사용 가능"
+            "기본 모션 8종"
         ],
-        formats: ["PSD", "PNG", "Live2D"],
+        formats: ["PSD", "PNG"], // Mock
         creator: {
-            name: "PixelMaster",
-            avatar: avatar1,
-            followers: 12500,
-            totalSales: 234,
-            rating: 4.9,
+            name: product.creator?.name || "알 수 없음",
+            avatar: product.creator?.avatar || avatar1,
+            followers: 0, // Missing in product list response usually
+            totalSales: 0,
+            rating: 5.0,
             verified: true,
-            description: "5년차 버츄얼 아바타 전문 크리에이터입니다. 사이버펑크와 판타지 스타일을 주로 작업합니다."
+            description: "크리에이터 소개가 없습니다."
         },
-        detailedDescription: `
-      <h2>✨ 네온 드리머 상세 소개</h2>
-      <p>안녕하세요! 사이버펑크 세계관을 기반으로 제작된 오리지널 아바타 '네온 드리머'입니다.</p>
-      <p>이 아바타는 VTube Studio와 호환되며, 방송용으로 즉시 사용 가능하도록 세팅되어 있습니다.</p>
-      
-      <h3>🎥 모션 프리뷰</h3>
-      <p>다양한 표정과 자연스러운 움직임을 확인해보세요.</p>
-      <div class="grid grid-cols-2 gap-4 my-4">
-        <img src="${avatarDetail1.src}" class="rounded-lg shadow-md" alt="Motion 1" />
-        <img src="${avatarDetail2.src}" class="rounded-lg shadow-md" alt="Motion 2" />
-      </div>
+        detailedDescription: product.description // Use simple description for now
+    } : null;
 
-      <h3>🎨 색상 팔레트</h3>
-      <p>주요 컬러는 시안(#00FFFF)과 마젠타(#FF00FF)를 사용하여 네온 사인의 화려함을 표현했습니다.</p>
-      
-      <h3>📦 파일 구성</h3>
-      <ul>
-        <li>Live2D 모델 파일 (.moc3)</li>
-        <li>텍스처 아틀라스</li>
-        <li>물리 연산 설정 파일 (.json)</li>
-        <li>표정 설정 파일 (.exp3.json)</li>
-        <li>PSD 원본 (레이어 분리됨)</li>
-      </ul>
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin text-primary">로딩 중...</div></div>;
+    }
 
-      <p class="text-xs text-muted-foreground mt-8">* 무단 재배포 및 수정을 금지합니다. 상업적 이용 시 라이센스 범위를 확인해주세요.</p>
-    `
-    };
+    if (!avatar) {
+        return <div className="min-h-screen flex items-center justify-center">상품을 찾을 수 없습니다.</div>;
+    }
 
     const reviews = [
         { id: 1, user: "HappyVTuber", rating: 5, date: "2024-01-15", content: "정말 퀄리티가 높아요! 리깅도 완벽하고 표정도 다양해서 만족합니다.", helpful: 23 },

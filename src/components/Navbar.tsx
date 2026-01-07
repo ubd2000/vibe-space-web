@@ -8,10 +8,12 @@ import { Menu, X, ShoppingBag, Users, Palette, ShoppingCart } from "lucide-react
 import { useCart } from "@/hooks/useCart";
 import { CATEGORIES } from "@/lib/constants";
 import { ChevronDown } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { itemCount } = useCart();
+  const { user, logout, isLoading } = useAuth();
   const pathname = usePathname();
 
   const navLinks = [
@@ -100,19 +102,30 @@ const Navbar = () => {
                 )}
               </Button>
             </Link>
+
             {/* Creator My Profile (Demo Link) */}
-            <Link href="/creators/me">
-              <Button variant="ghost" className="text-primary hover:text-primary/80">
-                <Users className="w-4 h-4 mr-2" />
-                내 프로필
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button variant="ghost">로그인</Button>
-            </Link>
-            <Link href="/signup">
-              <Button variant="glow">시작하기</Button>
-            </Link>
+            {user ? (
+              <>
+                <Link href={user.role === 'CREATOR' ? "/creator/dashboard" : "/buyer/dashboard"}>
+                  <Button variant="ghost" className="text-primary hover:text-primary/80">
+                    <Users className="w-4 h-4 mr-2" />
+                    내 프로필
+                  </Button>
+                </Link>
+                <Button variant="ghost" onClick={logout}>로그아웃</Button>
+              </>
+            ) : (
+              isLoading ? null : (
+                <>
+                  <Link href="/login">
+                    <Button variant="ghost">로그인</Button>
+                  </Link>
+                  <Link href="/signup">
+                    <Button variant="glow">시작하기</Button>
+                  </Link>
+                </>
+              )
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -156,12 +169,29 @@ const Navbar = () => {
                     )}
                   </Button>
                 </Link>
-                <Link href="/login" onClick={() => setIsOpen(false)}>
-                  <Button variant="ghost" className="w-full">로그인</Button>
-                </Link>
-                <Link href="/signup" onClick={() => setIsOpen(false)}>
-                  <Button variant="glow" className="w-full">시작하기</Button>
-                </Link>
+                {user ? (
+                  <>
+                    <Link href={user.role === 'CREATOR' ? "/creator/dashboard" : "/buyer/dashboard"} onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Users className="w-4 h-4 mr-2" />
+                        내 프로필
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" className="w-full" onClick={() => {
+                      logout();
+                      setIsOpen(false);
+                    }}>로그아웃</Button>
+                  </>
+                ) : (
+                  <>
+                    <Link href="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="ghost" className="w-full">로그인</Button>
+                    </Link>
+                    <Link href="/signup" onClick={() => setIsOpen(false)}>
+                      <Button variant="glow" className="w-full">시작하기</Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import { Star, Award, Users } from "lucide-react";
+import { Star, Award, Users, TrendingUp, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import Image, { StaticImageData } from "next/image";
@@ -6,8 +6,14 @@ import avatar1 from "@/assets/avatar-1.png";
 import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
 import avatar4 from "@/assets/avatar-4.png";
+import { useEffect, useState } from "react";
+import { Creator, CreatorService } from "@/services/creator.service";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { authService } from "@/services/auth.service";
 
 interface CreatorCardProps {
+  id: number | string;
   avatar: string | StaticImageData;
   name: string;
   tags: string[];
@@ -18,11 +24,26 @@ interface CreatorCardProps {
   index: number;
 }
 
-const CreatorCard = ({ avatar, name, tags, followers, sales, rating, verified, index }: CreatorCardProps) => {
+const CreatorCard = ({ id, avatar, name, tags, followers, sales, rating, verified, index }: CreatorCardProps) => {
+  const router = useRouter();
+
+  const handleFollow = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const user = authService.getCurrentUser();
+    if (!user) {
+      if (confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) {
+        router.push("/login?returnUrl=/");
+      }
+      return;
+    }
+    // TODO: Call API to toggle follow
+    alert(`${name}님을 팔로우했습니다!`);
+  };
+
   return (
     <div
       className="group p-6 rounded-2xl glass hover:shadow-[0_0_40px_hsl(180_100%_50%/0.2)] transition-all duration-500 animate-fade-in"
-      style={{ animationDelay: `${index * 0.15}s` }}
+      style={{ animationDelay: `${index * 0.1}s` }}
     >
       <div className="flex items-center gap-4 mb-4">
         <div className="relative">
@@ -69,7 +90,7 @@ const CreatorCard = ({ avatar, name, tags, followers, sales, rating, verified, i
         </div>
       </div>
 
-      <Link href={`/creators/${name}`}>
+      <Link href={`/creators/${id}`}>
         <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
           프로필 보기
         </Button>
@@ -79,12 +100,23 @@ const CreatorCard = ({ avatar, name, tags, followers, sales, rating, verified, i
 };
 
 const CreatorsSection = () => {
-  const creators = [
-    { avatar: avatar1, name: "PixelMaster", tags: ["VTuber", "Live2D", "Illustration"], followers: 12500, sales: 234, rating: 4.9, verified: true },
-    { avatar: avatar2, name: "MoonArtist", tags: ["Fantasy", "3D Model", "Texture"], followers: 8900, sales: 156, rating: 4.8, verified: true },
-    { avatar: avatar3, name: "TechCreator", tags: ["Cyberpunk", "Mecha", "VRChat"], followers: 15600, sales: 312, rating: 4.9, verified: true },
-    { avatar: avatar4, name: "KawaiiDev", tags: ["Cute", "Anime", "Accessories"], followers: 21000, sales: 489, rating: 5.0, verified: true },
-  ];
+  const [creators, setCreators] = useState<Creator[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCreators = async () => {
+      try {
+        const data = await CreatorService.getTopFollowers();
+        setCreators(data);
+      } catch (error) {
+        console.error("Failed to fetch creators:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCreators();
+  }, []);
 
   return (
     <section id="creators" className="py-20 relative overflow-hidden">
@@ -105,11 +137,28 @@ const CreatorsSection = () => {
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {creators.map((creator, index) => (
-            <CreatorCard key={index} {...creator} index={index} />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="w-10 h-10 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {creators.map((creator, index) => (
+              <CreatorCard
+                key={creator.id}
+                id={creator.id}
+                avatar={creator.avatarUrl || avatar1} // Fallback image
+                name={creator.displayName}
+                tags={["Creator"]} // Backend doesn't strictly return tags yet, mock it or add field
+                followers={creator.stats.followers}
+                sales={creator.stats.totalSales}
+                rating={creator.stats.rating}
+                verified={creator.verified}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
 
         {/* CTA */}
         <div className="text-center mt-12">

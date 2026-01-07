@@ -1,43 +1,41 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts/AuthContext";
+import { PortfolioService } from "@/services/portfolio.service";
+import { CreatorService } from "@/services/creator.service";
 
 export default function PortfolioManagementPage() {
-    // Mock Data
-    const portfolios = [
-        {
-            id: 1,
-            title: "Cyberpunk City Concept",
-            image: "https://images.unsplash.com/photo-1615840287214-7ff58ee04896?auto=format&fit=crop&q=80&w=800",
-            category: "Concept Art",
-            date: "2024.03.15",
-            views: 1240,
-            likes: 45
-        },
-        {
-            id: 2,
-            title: "Character Sketch - Neon",
-            image: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=800",
-            category: "Sketch",
-            date: "2024.03.14",
-            views: 890,
-            likes: 32
-        },
-        {
-            id: 3,
-            title: "3D Modeling Process",
-            image: "https://images.unsplash.com/photo-1617791160505-6f00504e3519?auto=format&fit=crop&q=80&w=800",
-            category: "3D Model",
-            date: "2024.03.10",
-            views: 2100,
-            likes: 156
-        },
-    ];
+    const { user } = useAuth();
+    const [portfolios, setPortfolios] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!user) return;
+
+        const fetchPortfolios = async () => {
+            try {
+                const creator = await CreatorService.getByUserId(user.id);
+                if (creator) {
+                    const data = await PortfolioService.getByCreatorId(creator.id);
+                    setPortfolios(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch portfolios:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchPortfolios();
+    }, [user]);
+
+    if (loading) return <div className="p-8 text-center">Loading...</div>;
 
     return (
         <div className="space-y-8 animate-fade-in">
@@ -77,22 +75,26 @@ export default function PortfolioManagementPage() {
                         className="flex flex-col md:flex-row items-center gap-6 p-4 rounded-xl glass hover:bg-muted/40 transition-all group"
                     >
                         {/* Image */}
-                        <div className="w-full md:w-48 aspect-video rounded-lg overflow-hidden relative flex-shrink-0">
-                            <Image
-                                src={item.image}
-                                alt={item.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-500"
-                            />
+                        <div className="w-full md:w-48 aspect-video rounded-lg overflow-hidden relative flex-shrink-0 bg-secondary/10">
+                            {item.imageUrl ? (
+                                <Image
+                                    src={item.imageUrl}
+                                    alt={item.title}
+                                    fill
+                                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                />
+                            ) : (
+                                <div className="flex items-center justify-center h-full text-muted-foreground text-xs">No Image</div>
+                            )}
                         </div>
 
                         {/* Content */}
                         <div className="flex-1 w-full text-center md:text-left">
                             <div className="flex flex-col md:flex-row md:items-center gap-2 mb-2 justify-center md:justify-start">
                                 <span className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-bold w-fit mx-auto md:mx-0">
-                                    {item.category}
+                                    {item.type || 'General'}
                                 </span>
-                                <span className="text-xs text-muted-foreground">{item.date}</span>
+                                <span className="text-xs text-muted-foreground">{item.createdAt || 'N/A'}</span>
                             </div>
                             <h3 className="font-display font-bold text-lg text-foreground mb-1">
                                 {item.title}
@@ -100,11 +102,11 @@ export default function PortfolioManagementPage() {
                             <div className="flex items-center gap-4 text-sm text-muted-foreground justify-center md:justify-start">
                                 <div className="flex items-center gap-1">
                                     <Eye className="w-4 h-4" />
-                                    {item.views.toLocaleString()}
+                                    {item.views || 0}
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <Heart className="w-4 h-4" />
-                                    {item.likes.toLocaleString()}
+                                    {item.likes || 0}
                                 </div>
                             </div>
                         </div>

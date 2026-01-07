@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Orbitron } from "next/font/google"; // Using generic names, will adjust if not available or use local fonts as fallback
 import "./globals.css";
 import { Providers } from "./providers";
+import AuthGuard from "@/components/auth/AuthGuard";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const orbitron = Orbitron({ subsets: ["latin"], variable: "--font-orbitron" });
@@ -20,7 +21,9 @@ export default function RootLayout({
         <html lang="ko" suppressHydrationWarning>
             <body className={`${inter.variable} ${orbitron.variable} font-sans antialiased bg-background text-foreground`}>
                 <Providers>
-                    {children}
+                    <AuthGuard>
+                        {children}
+                    </AuthGuard>
                 </Providers>
             </body>
         </html>
