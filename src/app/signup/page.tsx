@@ -14,7 +14,7 @@ export default function SignupPage() {
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         username: '',
-        fullName: '',
+        nickname: '',
         email: '',
         password: ''
     });
@@ -33,7 +33,7 @@ export default function SignupPage() {
         try {
             await authService.register({
                 username: formData.username,
-                fullName: formData.fullName,
+                nickname: formData.nickname,
                 email: formData.email,
                 password: formData.password
             });
@@ -79,29 +79,13 @@ export default function SignupPage() {
 
                         <form onSubmit={handleSignup} className="space-y-4 relative">
                             <div className="space-y-2">
-                                <Label htmlFor="fullName">이름</Label>
-                                <div className="relative">
-                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                    <Input
-                                        id="fullName"
-                                        type="text"
-                                        placeholder="홍길동"
-                                        className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
-                                        required
-                                        value={formData.fullName}
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="username">닉네임 (아이디)</Label>
+                                <Label htmlFor="username">이름</Label>
                                 <div className="relative">
                                     <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input
                                         id="username"
                                         type="text"
-                                        placeholder="vibez"
+                                        placeholder="홍길동"
                                         className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
                                         required
                                         value={formData.username}
@@ -111,7 +95,23 @@ export default function SignupPage() {
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor="email">이메일</Label>
+                                <Label htmlFor="nickname">닉네임</Label>
+                                <div className="relative">
+                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                    <Input
+                                        id="nickname"
+                                        type="text"
+                                        placeholder="vibez"
+                                        className="pl-10 bg-background/50 border-white/10 focus:border-primary/50"
+                                        required
+                                        value={formData.nickname}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="email">이메일 (아이디)</Label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                     <Input

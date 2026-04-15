@@ -11,20 +11,122 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import { CreatorService } from "@/services/creator.service";
 
 export default function BecomeCreatorPage() {
+    const { user } = useAuth();
+    const router = useRouter();
     const [step, setStep] = useState<"landing" | "form">("landing");
+
+    const handleStartApplication = () => {
+        if (!user) {
+            if (confirm("로그인이 필요한 서비스입니다. 로그인 하시겠습니까?")) {
+                router.push('/login');
+            }
+            return;
+        }
+        setStep("form");
+    };
     const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!user) {
+            toast.error("로그인이 필요합니다.");
+            return;
+        }
+
         setIsSubmitting(true);
-        // Mock API call
-        setTimeout(() => {
+
+        // Form extraction
+        const form = e.target as HTMLFormElement;
+        const nickname = (form.elements.namedItem('nickname') as HTMLInputElement).value;
+        const portfolio = (form.elements.namedItem('portfolio') as HTMLInputElement).value;
+        const introduction = (form.elements.namedItem('introduction') as HTMLTextAreaElement).value;
+
+        // 입력값 검증
+        if (!nickname.trim() || nickname.trim().length < 2) {
+            toast.error("활동명은 2글자 이상 입력해주세요.");
             setIsSubmitting(false);
-            toast.success("크리에이터 신청이 완료되었습니다! 심사 결과는 메일로 안내됩니다.");
-            // Reset or redirect could go here
-        }, 1500);
+            return;
+        }
+
+        if (!portfolio.trim()) {
+            toast.error("포트폴리오 링크를 입력해주세요.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (!introduction.trim() || introduction.trim().length < 10) {
+            toast.error("소개글은 10글자 이상 입력해주세요.");
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Combine portfolio into description
+        const description = `${introduction}\n\n[포트폴리오]\n${portfolio}`;
+
+        try {
+            // 먼저 이미 크리에이터인지 확인
+            try {
+                const existingCreator = await CreatorService.getByUserId(user.id);
+                if (existingCreator) {
+                    toast.error("이미 크리에이터로 등록되어 있습니다.");
+                    router.push('/creator/dashboard');
+                    return;
+                }
+            } catch (error: any) {
+                // 404 에러는 정상 (크리에이터가 없다는 의미)
+                if (error.response?.status !== 404) {
+                    throw error;
+                }
+            }
+
+            // 크리에이터 등록
+            await CreatorService.create({
+                userId: user.id,
+                displayName: nickname.trim(),
+                description: description,
+                avatarUrl: user.profileImageUrl || undefined
+            });
+
+            toast.success("크리에이터 신청이 완료되었습니다! 심사는 보통 24시간 이내에 완료됩니다.");
+
+            // 대시보드로 이동
+            setTimeout(() => {
+                router.push('/creator/dashboard');
+            }, 1500);
+
+        } catch (error: any) {
+            console.error("크리에이터 신청 오류:", error);
+
+            // 상세한 에러 메시지 처리
+            if (error.response) {
+                const status = error.response.status;
+                const message = error.response.data?.message || error.response.data?.error;
+
+                if (status === 400) {
+                    toast.error(message || "입력 정보를 확인해주세요.");
+                } else if (status === 401) {
+                    toast.error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+                    setTimeout(() => router.push('/login'), 1500);
+                } else if (status === 409) {
+                    toast.error("이미 크리에이터로 등록되어 있습니다.");
+                } else if (status === 500) {
+                    toast.error("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+                } else {
+                    toast.error(message || "신청 중 오류가 발생했습니다.");
+                }
+            } else if (error.request) {
+                toast.error("서버와 연결할 수 없습니다. 네트워크 연결을 확인해주세요.");
+            } else {
+                toast.error("알 수 없는 오류가 발생했습니다.");
+            }
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -56,7 +158,7 @@ export default function BecomeCreatorPage() {
                                         variant="glow"
                                         size="lg"
                                         className="text-lg px-8 h-14"
-                                        onClick={() => setStep("form")}
+                                        onClick={handleStartApplication}
                                     >
                                         무료로 시작하기 <ArrowRight className="ml-2 w-5 h-5" />
                                     </Button>
@@ -132,7 +234,7 @@ export default function BecomeCreatorPage() {
                                 variant="glow"
                                 size="lg"
                                 className="text-xl px-12 py-8 rounded-full shadow-2xl shadow-primary/20"
-                                onClick={() => setStep("form")}
+                                onClick={handleStartApplication}
                             >
                                 크리에이터 신청하기
                             </Button>

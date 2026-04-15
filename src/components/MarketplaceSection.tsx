@@ -7,6 +7,7 @@ import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
 import { useEffect, useState } from "react";
 import { Product, ProductService } from "@/services/product.service";
+import { CategoryService } from "@/services/category.service";
 import { CATEGORIES } from "@/lib/constants";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -92,30 +93,47 @@ const AvatarCard = ({ id, image, name, creator, price, likes, views, index }: Av
 
 const MarketplaceSection = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["전체"]);
+  const [selectedCategory, setSelectedCategory] = useState("전체");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProducts = async () => {
+    const fetchData = async () => {
       try {
-        const data = await ProductService.getActive();
-        setProducts(data);
+        const [productsData, categoriesData] = await Promise.all([
+          ProductService.getTrending(),
+          CategoryService.getTopLevelCategories()
+        ]);
+
+        setProducts(productsData);
+        if (categoriesData && categoriesData.length > 0) {
+          setCategories(["전체", ...categoriesData.map(c => c.name)]);
+        } else {
+          // Fallback if API returns empty
+          setCategories(["전체", ...CATEGORIES.map(c => c.name)]);
+        }
       } catch (error) {
-        console.error("Failed to fetch products:", error);
+        console.error("Failed to fetch data:", error);
+        // Fallback on error
+        setCategories(["전체", ...CATEGORIES.map(c => c.name)]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProducts();
+    fetchData();
   }, []);
-
-  const categories = ["전체", ...CATEGORIES.map(c => c.name)];
 
   const [visibleCount, setVisibleCount] = useState(8);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 8);
   };
+
+  // 클라이언트 사이드 필터링
+  const filteredProducts = selectedCategory === "전체"
+    ? products
+    : products.filter(product => product.category.name === selectedCategory);
 
   return (
     <section id="marketplace" className="py-20 relative">
@@ -138,9 +156,13 @@ const MarketplaceSection = () => {
           {categories.map((category, index) => (
             <Button
               key={category}
-              variant={index === 0 ? "glow" : "glass"}
+              variant={selectedCategory === category ? "glow" : "glass"}
               size="sm"
               className="rounded-full"
+              onClick={() => {
+                setSelectedCategory(category);
+                setVisibleCount(8); // 카테고리 변경 시 더보기 초기화
+              }}
             >
               {category}
             </Button>
@@ -154,7 +176,7 @@ const MarketplaceSection = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.slice(0, visibleCount).map((product, index) => (
+            {filteredProducts.slice(0, visibleCount).map((product, index) => (
               <AvatarCard
                 key={product.id}
                 id={product.id}
@@ -171,7 +193,7 @@ const MarketplaceSection = () => {
         )}
 
         {/* Load More */}
-        {visibleCount < products.length && (
+        {visibleCount < filteredProducts.length && (
           <div className="text-center mt-12">
             <Button variant="outline" size="lg" onClick={handleLoadMore}>
               더 많은 아바타 보기

@@ -19,9 +19,9 @@ export interface AuthResponse {
     email: string;
     role: string;
     id: number;
-    profileImageUrl?: string; // Renamed from avatarUrl
-    nickname?: string;        // Renamed from fullName
-    introduction?: string;    // Renamed from bio
+    profileImageUrl?: string; // avatarUrl에서 변경됨
+    nickname?: string;        // fullName에서 변경됨
+    introduction?: string;    // bio에서 변경됨
 }
 
 export const authService = {
@@ -30,21 +30,21 @@ export const authService = {
         return response.data;
     },
 
-    // Future: login, me, etc.
+    // 향후: login, me 등 추가 예정
     async login(data: LoginRequest): Promise<AuthResponse> {
         const response = await api.post<AuthResponse>('/auth/login', data);
         if (response.data.accessToken) {
             localStorage.setItem('accessToken', response.data.accessToken);
 
-            // Fetch detailed user profile to get nickname, introduction, profileImageUrl
-            // because AuthResponse from backend might lack them (or to ensure freshness)
+            // 닉네임, 소개, 프로필 이미지 URL 등 상세 프로필 정보를 가져옵니다.
+            // 백엔드의 AuthResponse에 해당 정보가 없거나, 최신 상태를 보장하기 위함입니다.
             try {
-                // Determine userId from response. Assuming response.data.id exists.
+                // 응답에서 userId를 확인합니다. response.data.id가 존재한다고 가정합니다.
                 if (response.data.id) {
                     const userDetailResponse = await api.get<AuthResponse>(`/users/${response.data.id}`);
                     const userDetail = userDetailResponse.data;
 
-                    // Merge auth response with detailed profile
+                    // 인증 응답과 상세 프로필 정보를 병합합니다.
                     const fullUserData = {
                         ...response.data,
                         ...userDetail
@@ -53,7 +53,7 @@ export const authService = {
                     return fullUserData;
                 }
             } catch (error) {
-                console.error("Failed to fetch user details on login", error);
+                console.error("로그인 시 사용자 상세 정보를 가져오는데 실패했습니다.", error);
             }
 
             localStorage.setItem('user', JSON.stringify(response.data));

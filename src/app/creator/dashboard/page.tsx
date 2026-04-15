@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { DollarSign, Package, Users, TrendingUp } from "lucide-react";
+import { DollarSign, Package, Users, TrendingUp, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatorService } from "@/services/creator.service";
+import { OrderService } from "@/services/order.service";
 import Link from "next/link";
 
 export default function CreatorDashboardPage() {
@@ -20,33 +21,21 @@ export default function CreatorDashboardPage() {
 
         const fetchDashboardData = async () => {
             try {
-                // 1. Get Creator Profile by User ID to get Creator ID
-                const creatorData = await CreatorService.getByUserId(user.id); // Assuming user object has id. Wait, AuthResponse might not have id?
-                // Let's check AuthResponse again. It usually has ID in JWT but maybe not in the response object directly shown in Service file?
-                // user is AuthResponse. Let's assume it has `id` or we need to decode token or fetch /auth/me.
-                // The API /auth/login response shows username, email, role. No ID?
-                // The API /auth/me shows username, email, role. No ID?
-                // Wait, if no user ID in Auth context, how do we get it?
-                // Maybe I need to update AuthContext to store full user details or fetch /auth/me which returns ID?
-                // Let's assume for now user has id (standard). If not I will need to fix AuthContext.
+                // 1. 크리에이터 정보 조회
+                const creatorData = await CreatorService.getByUserId(user.id);
 
                 if (creatorData) {
                     setCreator(creatorData);
 
-                    // 2. Fetch Orders (Recent Sales) - We need an endpoint for sold orders?
-                    // The OrderService.getByUserId gets orders *bought* by user.
-                    // We need orders *sold* by creator.
-                    // API might not have this endpoint yet based on list?
-                    // "GET /api/orders/user/{userId}" -> User Order List
-                    // "GET /api/creators/{creatorId}" has stats.
-                    // Use stats for numbers.
-                    // For recent orders list, maybe "GET /api/orders/creator/{creatorId}"? (Not in generic list)
-                    // If not available, we might leave recent orders empty or mock until API exists.
-                    // Or use `ProductService` if it has sales history?
-                    // Let's check API doc... "GET /api/orders/user/{userId}" is for buyer.
-                    // No endpoint listed for "Creator Sales History".
-                    // I will leave recent orders empty/mock for now or comment it out.
-                    // But I will trigger state update.
+                    // 2. 크리에이터 판매 내역 조회
+                    try {
+                        const ordersData = await OrderService.getByCreatorId(creatorData.id);
+                        // 최근 5개만 표시
+                        setOrders(ordersData.slice(0, 5));
+                    } catch (error) {
+                        console.warn("Failed to fetch orders:", error);
+                        setOrders([]);
+                    }
                 }
             } catch (error) {
                 console.error("Failed to fetch dashboard data:", error);
@@ -62,8 +51,8 @@ export default function CreatorDashboardPage() {
     if (!creator) return <div className="p-8 text-center">크리에이터 정보를 찾을 수 없습니다.</div>;
 
     const stats = {
-        todayRevenue: "₩0", // API doesn't provide today revenue yet
-        monthRevenue: "₩0", // API doesn't provide month revenue yet
+        todayRevenue: "₩0", // API가 아직 오늘의 수익을 제공하지 않음
+        monthRevenue: "₩0", // API가 아직 이번 달 수익을 제공하지 않음
         totalSales: creator.stats.totalSales || 0,
         followers: creator.stats.followers || 0
     };
@@ -91,16 +80,43 @@ export default function CreatorDashboardPage() {
             </div>
 
             <div className="grid md:grid-cols-2 gap-8">
-                {/* Recent Orders - Placeholder as no API */}
+                {/* 최근 주문 */}
                 <section className="bg-glass rounded-xl border border-white/5 p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold">최근 주문 (API 미구현)</h2>
+                        <h2 className="text-lg font-bold">최근 주문</h2>
                         <Link href="/creator/analytics" className="text-xs text-primary hover:underline">더보기</Link>
                     </div>
                     <div className="space-y-3">
-                        <div className="p-4 text-center text-muted-foreground text-sm">
-                            최근 판매 내역 API가 준비 중입니다.
-                        </div>
+                        {orders.length === 0 ? (
+                            <div className="p-4 text-center text-muted-foreground text-sm">
+                                아직 주문이 없습니다.
+                            </div>
+                        ) : (
+                            orders.map((order: any) => (
+                                <div key={order.id} className="p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors">
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                            <ShoppingBag className="w-4 h-4 text-primary" />
+                                            <span className="text-sm font-medium">{order.orderNumber || `주문 #${order.id}`}</span>
+                                        </div>
+                                        <span className={`text-xs px-2 py-1 rounded-full ${
+                                            order.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' :
+                                            order.status === 'PAID' ? 'bg-blue-500/20 text-blue-400' :
+                                            order.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-400' :
+                                            'bg-gray-500/20 text-gray-400'
+                                        }`}>
+                                            {order.status === 'COMPLETED' ? '완료' :
+                                             order.status === 'PAID' ? '결제완료' :
+                                             order.status === 'PENDING' ? '대기중' : order.status}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                        <span>{order.items?.length || 0}개 상품</span>
+                                        <span className="font-semibold text-foreground">₩{order.totalAmount?.toLocaleString() || 0}</span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
 

@@ -80,14 +80,14 @@ export default function BuyerSettingsPage() {
         try {
             const updatedUser = await UserService.uploadAvatar(user.id, file);
 
-            // Update local user state properly
+            // 로컬 유저 상태 업데이트
             const newUserState = {
                 ...user,
                 profileImageUrl: updatedUser.profileImageUrl
             };
             setUser(newUserState);
 
-            // Update localStorage
+            // localStorage 업데이트
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const parsed = JSON.parse(storedUser);
@@ -145,15 +145,15 @@ export default function BuyerSettingsPage() {
                 introduction: profileData.introduction
             });
 
-            // Update local user state preserving existing fields (like accessToken)
-            // Backend returns UserResponse which might differ from AuthResponse
+            // 로컬 유저 상태 업데이트 (기존 필드는 유지)
+            // 백엔드가 반환하는 UserResponse는 AuthResponse와 다를 수 있음
             setUser({
                 ...user,
                 nickname: profileData.nickname,
                 introduction: profileData.introduction
             });
 
-            // Update localStorage as well to persist changes
+            // localStorage 업데이트 (변경사항 유지)
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 const parsed = JSON.parse(storedUser);

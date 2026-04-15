@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -12,8 +12,10 @@ import avatar2 from "@/assets/avatar-2.png";
 import avatar3 from "@/assets/avatar-3.png";
 import avatar4 from "@/assets/avatar-4.png";
 import Image from "next/image";
+import { CategoryService, CategoryTree } from "@/services/category.service";
+import * as LucideIcons from "lucide-react";
 
-// Mock data (extended)
+// 모의 데이터 (확장됨)
 const allItems = [
     { id: 1, image: avatar1, name: "네온 드리머", creator: "PixelMaster", price: "₩25,000", likes: 234, views: 1250, category: "VTuber" },
     { id: 2, image: avatar2, name: "루나 엘프", creator: "MoonArtist", price: "₩35,000", likes: 456, views: 2340, category: "판타지" },
@@ -29,12 +31,43 @@ const allItems = [
     { id: 12, image: avatar4, name: "고딕 롤리타", creator: "DarkCute", price: "₩36,000", likes: 890, views: 5600, category: "고딕" },
 ];
 
-import { CATEGORIES } from "@/lib/constants";
 import { ChevronDown, ChevronRight } from "lucide-react";
+
+// Lucide 아이콘을 동적으로 렌더링하는 헬퍼 함수
+const renderIcon = (iconUrl: string | undefined) => {
+    if (!iconUrl || !iconUrl.startsWith('lucide:')) return null;
+    const iconName = iconUrl.replace('lucide:', '');
+    // 케밥 케이스를 파스칼 케이스로 변환 (예: 'code-2' → 'Code2')
+    const pascalCase = iconName.split('-').map(part =>
+        part.charAt(0).toUpperCase() + part.slice(1)
+    ).join('');
+    const Icon = (LucideIcons as any)[pascalCase];
+    return Icon ? <Icon className="w-4 h-4" /> : null;
+};
 
 export default function MarketplacePage() {
     const [selectedCategory, setSelectedCategory] = useState("전체");
     const [searchQuery, setSearchQuery] = useState("");
+    const [categories, setCategories] = useState<CategoryTree[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    // API에서 카테고리 가져오기
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                setLoading(true);
+                const data = await CategoryService.getCategoryTree();
+                setCategories(data);
+            } catch (err) {
+                console.error('Failed to load categories:', err);
+                setError('카테고리를 불러오는데 실패했습니다.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadCategories();
+    }, []);
 
     const filteredItems = allItems.filter(item => {
         const matchesCategory = selectedCategory === "전체" || item.category === selectedCategory ||
@@ -78,14 +111,30 @@ export default function MarketplacePage() {
                         {/* Left Sidebar (Booth Style) */}
                         <aside className="hidden lg:block w-64 shrink-0">
                             <div className="sticky top-24 space-y-8">
-                                {CATEGORIES.map((category) => (
-                                    <div key={category.name} className="bg-card/30 rounded-xl p-4 border border-white/5">
+                                {/* Loading State */}
+                                {loading && (
+                                    <div className="bg-card/30 rounded-xl p-4 border border-white/5">
+                                        <p className="text-sm text-muted-foreground">카테고리 로딩 중...</p>
+                                    </div>
+                                )}
+
+                                {/* Error State */}
+                                {error && (
+                                    <div className="bg-card/30 rounded-xl p-4 border border-red-500/20">
+                                        <p className="text-sm text-red-500">{error}</p>
+                                    </div>
+                                )}
+
+                                {/* Categories */}
+                                {!loading && !error && categories.map((category) => (
+                                    <div key={category.id} className="bg-card/30 rounded-xl p-4 border border-white/5">
                                         <h3 className="font-bold text-sm text-foreground/80 mb-3 flex items-center gap-2">
+                                            {renderIcon(category.iconUrl)}
                                             {category.name}
                                         </h3>
                                         <div className="space-y-4">
                                             {category.subcategories.map((sub) => (
-                                                <div key={sub.name}>
+                                                <div key={sub.id}>
                                                     <button
                                                         onClick={() => setSelectedCategory(sub.name)}
                                                         className={`w-full text-left text-xs font-semibold py-1 px-2 rounded-md mb-1 transition-colors flex items-center justify-between ${selectedCategory === sub.name
@@ -97,16 +146,16 @@ export default function MarketplacePage() {
                                                         {selectedCategory === sub.name && <ChevronRight className="w-3 h-3" />}
                                                     </button>
                                                     <div className="pl-3 border-l border-white/10 space-y-1">
-                                                        {sub.details.map((detail) => (
+                                                        {sub.subcategories.map((detail) => (
                                                             <button
-                                                                key={detail}
-                                                                onClick={() => setSelectedCategory(detail)}
-                                                                className={`w-full text-left text-[11px] py-1 px-2 rounded-md transition-colors ${selectedCategory === detail
+                                                                key={detail.id}
+                                                                onClick={() => setSelectedCategory(detail.name)}
+                                                                className={`w-full text-left text-[11px] py-1 px-2 rounded-md transition-colors ${selectedCategory === detail.name
                                                                     ? "text-primary font-medium"
                                                                     : "text-muted-foreground hover:text-foreground"
                                                                     }`}
                                                             >
-                                                                {detail}
+                                                                {detail.name}
                                                             </button>
                                                         ))}
                                                     </div>

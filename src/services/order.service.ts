@@ -56,5 +56,11 @@ export const OrderService = {
     getByStatus: async (status: string) => {
         const response = await api.get<Order[]>(`/orders/status/${status}`);
         return response.data;
+    },
+
+    // Get orders by creator ID (판매 내역)
+    getByCreatorId: async (creatorId: number | string) => {
+        const response = await api.get<Order[]>(`/orders/creator/${creatorId}`);
+        return response.data;
     }
 };

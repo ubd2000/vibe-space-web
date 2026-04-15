@@ -16,12 +16,18 @@ export interface Creator {
 }
 
 export const CreatorService = {
+    create: async (data: { userId: number; displayName: string; description?: string; avatarUrl?: string }) => {
+        const response = await api.post<Creator>('/creators', data);
+        return response.data;
+    },
+
     getAll: async () => {
         const response = await api.get<Creator[]>('/creators');
         return response.data;
     },
 
     getById: async (id: number | string) => {
+        // 실제 백엔드 API 호출 (권한 없이 접근 가능한 공개 엔드포인트)
         const response = await api.get<Creator>(`/creators/${id}`);
         return response.data;
     },

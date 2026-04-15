@@ -12,7 +12,10 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Paths that require login
         const protectedPrefixes = ['/buyer', '/creator', '/admin'];
-        const isProtected = protectedPrefixes.some(prefix => pathname.startsWith(prefix));
+        // 정확한 경로 매칭: /creator는 매칭, /creators는 매칭 안 됨
+        const isProtected = protectedPrefixes.some(prefix =>
+            pathname === prefix || pathname.startsWith(prefix + '/')
+        );
 
         if (isProtected) {
             const user = authService.getCurrentUser();
@@ -31,7 +34,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }, [pathname, router]);
 
     // Simple loading or null while checking
-    if (!authorized && ['/buyer', '/creator', '/admin'].some(prefix => pathname.startsWith(prefix))) {
+    if (!authorized && ['/buyer', '/creator', '/admin'].some(prefix =>
+        pathname === prefix || pathname.startsWith(prefix + '/')
+    )) {
         return null;
     }
 

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Camera, Save, Upload, User, Globe, Twitter, Disc } from "lucide-react";
 import Image from "next/image";
-import avatar1 from "@/assets/avatar-1.png"; // Using existing asset as default
+import avatar1 from "@/assets/avatar-1.png"; // 기존 에셋을 기본값으로 사용
 
 import { useAuth } from "@/contexts/AuthContext";
 import { CreatorService } from "@/services/creator.service";
@@ -16,7 +16,7 @@ import { toast } from "sonner"; // Assuming sonner is installed as seen in Buyer
 export default function SettingsPage() {
     const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
-    const [creator, setCreator] = useState<any>(null); // Replace any with Creator type if possible
+    const [creator, setCreator] = useState<any>(null); // 가능하면 Creator 타입으로 대체
 
     useEffect(() => {
         if (user) {
@@ -36,8 +36,8 @@ export default function SettingsPage() {
             const displayName = formData.get("shopName") as string;
             const description = formData.get("bio") as string;
 
-            // In a real scenario, we would handle file uploads here too.
-            // For now, we update text fields.
+            // 실제 시나리오에서는 여기서 파일 업로드도 처리해야 합니다.
+            // 현재는 텍스트 필드만 업데이트합니다.
 
             const creatorData = await CreatorService.getByUserId(user.id);
             if (creatorData) {
@@ -65,14 +65,14 @@ export default function SettingsPage() {
             </div>
 
             <form onSubmit={handleSave} className="space-y-8">
-                {/* Branding Section */}
+                {/* 브랜딩 섹션 */}
                 <div className="space-y-6 p-6 rounded-2xl glass border border-white/5">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                         <Upload className="w-5 h-5 text-primary" />
                         브랜딩
                     </h2>
 
-                    {/* Cover Image */}
+                    {/* 커버 이미지 */}
                     <div className="space-y-4">
                         <Label>커버 이미지</Label>
                         <div className="relative h-48 w-full rounded-xl overflow-hidden bg-secondary/20 group border-2 border-dashed border-white/10 hover:border-primary/50 transition-colors cursor-pointer">
@@ -89,7 +89,7 @@ export default function SettingsPage() {
                         </div>
                     </div>
 
-                    {/* Avatar */}
+                    {/* 아바타 */}
                     <div className="space-y-4">
                         <Label>프로필 아바타</Label>
                         <div className="flex items-center gap-6">
@@ -112,7 +112,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Basic Info Section */}
+                {/* 기본 정보 섹션 */}
                 <div className="space-y-6 p-6 rounded-2xl glass border border-white/5">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                         <User className="w-5 h-5 text-primary" />
@@ -149,7 +149,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Social Links Section */}
+                {/* 소셜 링크 섹션 */}
                 <div className="space-y-6 p-6 rounded-2xl glass border border-white/5">
                     <h2 className="text-xl font-semibold flex items-center gap-2">
                         <Globe className="w-5 h-5 text-primary" />

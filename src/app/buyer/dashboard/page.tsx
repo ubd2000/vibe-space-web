@@ -23,25 +23,25 @@ export default function BuyerDashboardPage() {
 
         const fetchData = async () => {
             try {
-                // Fetch Orders
+                // 주문 내역 조회
                 const ordersData = await OrderService.getByUserId(user.id);
                 setRecentOrders(ordersData);
 
-                // Fetch Stats (Derived from orders and other services if avail)
-                // Wishlist/Following API might not exist yet, defaulting to 0 or mock if needed.
-                // Assuming Order count is accurate.
+                // 통계 데이터 조회 (주문 및 기타 서비스에서 파생)
+                // 위시리스트/팔로잉 API는 아직 존재하지 않을 수 있으므로, 0 또는 모의 데이터로 기본 설정.
+                // 주문 수는 정확하다고 가정.
                 setStats({
                     orders: ordersData.length,
-                    wishlist: 0, // Placeholder
-                    following: 0  // Placeholder
+                    wishlist: 0, // 임시 값
+                    following: 0  // 임시 값
                 });
 
-                // Fetch Recommendations (Mock for now or ProductService.getActive)
+                // 추천 상품 조회 (현재는 모의 데이터 또는 ProductService.getActive 사용)
                 const products = await ProductService.getActive();
                 setRecommendations(products.slice(0, 2));
 
             } catch (error) {
-                console.error("Failed to fetch buyer dashboard data:", error);
+                console.error("구매자 대시보드 데이터를 불러오는데 실패했습니다:", error);
             } finally {
                 setLoading(false);
             }
