@@ -1,4 +1,5 @@
 'use client';
+export const runtime = 'edge';
 
 import { useState, use } from "react";
 import Navbar from "@/components/Navbar";
